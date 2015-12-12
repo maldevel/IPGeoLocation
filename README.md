@@ -20,3 +20,7 @@ IPGeoLocation is coded in Python 3.
 * Region Name
 * Timezone
 * Zip Code
+
+**Usage**
+---
+> python ip2geolocation.py -t x.x.x.x
