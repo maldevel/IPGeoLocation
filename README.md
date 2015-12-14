@@ -35,20 +35,20 @@ IPGeoLocation is coded in Python 3.
 
 **Usage**
 ---
-Get your IP Geolocation
+**Get your IP Geolocation**
 * python ip2geolocation.py
 
-Get IP Geolocation
+**Get IP Geolocation**
 * python ip2geolocation.py -t x.x.x.x
 
-Custom User Agent string 
+**Custom User Agent string** 
 * python ip2geolocation.py -t x.x.x.x -u "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko"
 
-Using Proxy
+**Using Proxy**
 * python ip2geolocation.py -t x.x.x.x --proxy http://127.0.0.1:8080
 
-Pick User Agent string randomly
+**Pick User Agent string randomly**
 * python ip2geolocation.py -t x.x.x.x -ru -ulist /path/to/user/agent/strings/filename.txt
 
-Retrieve IP geolocation and open it in Google maps with default browser
+**Retrieve IP geolocation and open location in Google maps with default browser**
 * python ip2geolocation.py -t x.x.x.x -gm
