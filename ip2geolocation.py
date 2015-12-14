@@ -42,7 +42,8 @@ def checkURL(url):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description=""" 
-IPGeoLocation {} - Retrieve IP Geolocation information
+IPGeoLocation {} 
+A tool to retrieve IP Geolocation information.
 Powered by http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
     
