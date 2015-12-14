@@ -38,24 +38,30 @@ Python 3.x
 
 **Usage**
 ---
-./ip2geolocation.py
 usage: ip2geolocation.py [-h] [-t Host] [-u User-Agent] [-r]
                          [-l User-Agent list] [-x Proxy] [-g]
 
 A tool to retrieve IP Geolocation information.
 
 optional arguments:
+
   -h, --help            show this help message and exit
+  
   -t Host, --target Host
                         The IP Address or Domain to be analyzed.
+						
   -u User-Agent, --useragent User-Agent
 						Set the User-Agent request header (default: IP2GeoLocation).
+						
   -r                    Pick User Agent strings randomly.
+  
   -l User-Agent list    Set tge User-Agent file list. Each User-Agent string should be in a new line.
+  
   -x Proxy, --proxy Proxy
                         Set the proxy server (example: http://127.0.0.1:8080).
+						
   -g                    Open IP location in Google maps with default browser.
-
+  
 
 **Examples**
 ---
