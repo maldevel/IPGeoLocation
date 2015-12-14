@@ -75,10 +75,10 @@ optional arguments:
 * ./ip2geolocation.py -t x.x.x.x -u "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko"
 
 **Using Proxy**
-* ./ip2geolocation.py -t x.x.x.x --proxy http://127.0.0.1:8080
+* ./ip2geolocation.py -t x.x.x.x -x http://127.0.0.1:8080
 
 **Pick User Agent string randomly**
-* ./ip2geolocation.py -t x.x.x.x -ru -ulist /path/to/user/agent/strings/filename.txt
+* ./ip2geolocation.py -t x.x.x.x -l /path/to/user/agent/strings/filename.txt -r 
 
 **Retrieve IP geolocation and open location in Google maps with default browser**
-* ./ip2geolocation.py -t x.x.x.x -gm
+* ./ip2geolocation.py -t x.x.x.x -g
