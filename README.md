@@ -27,3 +27,4 @@ IPGeoLocation is coded in Python 3.
 ---
 * python ip2geolocation.py -t x.x.x.x
 * python ip2geolocation.py -t x.x.x.x -u "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko"
+* python ip2geolocation.py -t x.x.x.x --proxy http://127.0.0.1:8080
