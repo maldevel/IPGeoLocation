@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+# encoding: UTF-8
+
 """
-    IPGeoLocation - Retrieve IP Geolocation information (http://ip-api.com)
-    Copyright (C) 2015  maldevel
+    IPGeoLocation - Retrieve IP Geolocation information 
+    Powered by http://ip-api.com
+    Copyright (C) 2015 @maldevel
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

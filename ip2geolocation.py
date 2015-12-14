@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+# encoding: UTF-8
+
 """
-    IPGeoLocation - Retrieve IP Geolocation information (http://ip-api.com)
-    Copyright (C) 2015  maldevel
+    IPGeoLocation - Retrieve IP Geolocation information 
+    Powered by http://ip-api.com
+    Copyright (C) 2015 @maldevel
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,12 +31,13 @@ VERSION = '1.0'
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description=""" 
-    IPGeoLocation {} - Retrieve IP Geolocation information
-                Powered by http://ip-api.com
+IPGeoLocation {} - Retrieve IP Geolocation information
+Powered by http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
     
-    parser.add_argument('-t', '--target', metavar='IP', type=str, dest='ip', default=None, help='IP Address')
-    parser.add_argument('-u', '--useragent', metavar='UserAgent', type=str, dest='useragent', default=None, help='User Agent')
+    parser.add_argument('-t', metavar='IP', type=str, dest='ip', default=None, help='IP Address')
+    parser.add_argument('-u', metavar='User_Agent', type=str, dest='useragent', default=None, help='User Agent String')
+    parser.add_argument('--proxy', metavar='Proxy', type=str, dest='proxy', default=None, help='Proxy (ex. http://127.0.0.1:8080)')
     
     if len(sys.argv) == 1:
         parser.print_help()
@@ -41,29 +46,29 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     ipGeoLocRequest = IpGeoLocationLib()
-    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.ip, args.useragent)
+    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.ip, args.useragent, args.proxy)
         
     if IpGeoLocObj:
         print("""
-        IPGeoLocation {} - Retrieve IP Geolocation information
-                Powered by http://ip-api.com
-                
-            Results
-            
-            IP: {}
-            ASN: {}
-            City: {}
-            Country: {}
-            Country Code: {}
-            ISP: {}
-            Latitude: {}
-            Longtitude: {}
-            Organization: {}
-            Region Code: {}
-            Region Name: {}
-            Timezone: {}
-            Zip Code: {}
-        """.format(VERSION,
+IPGeoLocation {} - Retrieve IP Geolocation information
+Powered by http://ip-api.com
+
+Results
+        
+    IP: {}
+    ASN: {}
+    City: {}
+    Country: {}
+    Country Code: {}
+    ISP: {}
+    Latitude: {}
+    Longtitude: {}
+    Organization: {}
+    Region Code: {}
+    Region Name: {}
+    Timezone: {}
+    Zip Code: {}
+            """.format(VERSION,
                    IpGeoLocObj.IP,
                    IpGeoLocObj.ASN,
                    IpGeoLocObj.City, 
