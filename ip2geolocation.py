@@ -26,7 +26,7 @@ import argparse, sys
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
 
-VERSION = '1.0'
+VERSION = '1.1'
 
 if __name__ == '__main__':
     
