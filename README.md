@@ -7,6 +7,12 @@ Powered by [ip-api](http://ip-api.com/docs/)
 IPGeoLocation is coded in Python 3.
 
 
+**Features**
+---
+* Define your own custom User Agent string
+* Proxy support
+
+
 **Geolocation Information**
 ---
 * ASN
