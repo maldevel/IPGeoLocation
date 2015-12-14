@@ -32,10 +32,11 @@ class IpGeoLocationLib:
         """Retrieve information"""
         if self._isValidIPAddress(ip):
             try:
-                req = request.urlopen('http://ip-api.com/json/{}'.format(ip))
-                if req.code == 200:
-                    encoding = req.headers.get_content_charset()
-                    return IpGeoLocation(json.loads(req.read().decode(encoding)))
+#req = request.Request('http://ip-api.com/json/{}'.format(ip)
+				response = request.urlopen(req)
+				if response.code == 200:
+                    encoding = response.headers.get_content_charset()
+                    return IpGeoLocation(json.loads(response.read().decode(encoding)))
             except:
                 pass
         return False
