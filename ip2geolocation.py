@@ -26,10 +26,19 @@ import argparse, sys
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
 import webbrowser
+from urllib.parse import urlparse
 
-VERSION = '1.2'
+VERSION = '1.3'
 
 
+def checkURL(url):
+        """Check if url is valid"""
+        url_checked = urlparse(url)
+        if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
+            raise argparse.ArgumentTypeError('Invalid %s Proxy URL (example: https://127.0.0.1:8080).' % url)
+        return url_checked
+    
+    
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description=""" 
@@ -37,24 +46,24 @@ IPGeoLocation {} - Retrieve IP Geolocation information
 Powered by http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
     
-    parser.add_argument('-t', metavar='IP', type=str, dest='ip', default=None, help='IP Address')
-    parser.add_argument('-u', metavar='User_Agent', type=str, dest='useragent', default=None, help='User Agent string.')
-    parser.add_argument('-ru', help='Pick User Agent strings randomly.', action='store_true')
-    parser.add_argument('-ulist', metavar='User_Agent_List', type=str, dest='useragentfilelist', default=None, help='User Agent File List. Each User Agent string in a new line.')
-    parser.add_argument('--proxy', metavar='Proxy', type=str, dest='proxy', default=None, help='Proxy (ex. http://127.0.0.1:8080)')
-    parser.add_argument('-gm', help='Open IP location in Google maps with default browser.', action='store_true')
+    parser.add_argument('-t', '--target', metavar='Host', help='The IP Address or Domain to be analyzed.')
+    parser.add_argument('-u', '--useragent', metavar='User-Agent', default='IP2GeoLocation', help='Set the User-Agent request header (default: IP2GeoLocation).')
+    parser.add_argument('-r', help='Pick User Agent strings randomly.', action='store_true')
+    parser.add_argument('-l', metavar='User-Agent list', dest='user_agent_list', help='Set tge User-Agent file list. Each User-Agent string should be in a new line.')
+    parser.add_argument('-x', '--proxy', metavar='Proxy', type=checkURL, help='Set the proxy server (example: http://127.0.0.1:8080).')
+    parser.add_argument('-g', help='Open IP location in Google maps with default browser.', action='store_true')
     
     args = parser.parse_args()
     
-    if(args.ru and args.useragentfilelist is None):
+    if(args.r and args.user_agent_list is None):
         print('You have to provide a file with User Agent strings. Each User agent string should be in a new line.')
         sys.exit(2)
-        
+    
     ipGeoLocRequest = IpGeoLocationLib()
-    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.ip, args.useragent, args.ru, args.useragentfilelist, args.proxy)
+    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.target, args.useragent, args.r, args.user_agent_list, args.proxy)
         
     if IpGeoLocObj:
-        if args.gm:
+        if args.g:
             if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
                 webbrowser.open('http://www.google.com/maps/place/{},{}/@{},{},16z'.
                             format(IpGeoLocObj.Latitude, IpGeoLocObj.Longtitude, IpGeoLocObj.Latitude, IpGeoLocObj.Longtitude))

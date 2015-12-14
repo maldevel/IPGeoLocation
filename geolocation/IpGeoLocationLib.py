@@ -25,7 +25,6 @@ __author__ = 'maldevel'
 import json, ipaddress 
 from urllib import request
 from geolocation.IpGeoLocation import IpGeoLocation
-from urllib.parse import urlparse
 import socket
 import os.path
 import random
@@ -34,18 +33,15 @@ class IpGeoLocationLib:
     """Retrieve IP Geolocation information using http://ip-api.com website"""
     
     def __init__(self):
-        self.UserAgent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:42.0) Gecko/20100101 Firefox/42.0'
         self.URL = 'http://ip-api.com/json/{}'
         self.Proxy = request.ProxyHandler({})
     
     
-    def GetInfo(self, host, userAgent=None, randomUserAgent=False, userAgentFileList=None, proxy=None):
+    def GetInfo(self, host, userAgent, randomUserAgent=False, userAgentFileList=None, proxy=False):
         """Retrieve information"""
         
-        if userAgent is not None:
-            self.UserAgent = userAgent
-            
-            
+        self.UserAgent = userAgent            
+
         if randomUserAgent and userAgentFileList is not None:
             userAgent = self.__pickRandomUserAgent(userAgentFileList)
             if(userAgent):
@@ -55,21 +51,10 @@ class IpGeoLocationLib:
                 return False
         
         
-        if proxy is not None:
-            proxyUrl = self.__isValidURL(proxy)
-            if(proxyUrl):
-                ip = self.__hostnameToIP(proxyUrl.hostname)
-                if ip:
-                    proxy = '{}://{}:{}'.format(proxyUrl.scheme, ip, proxyUrl.port)
-                    self.Proxy = request.ProxyHandler({proxyUrl.scheme:proxy})
-                    opener = request.build_opener(self.Proxy)
-                    request.install_opener(opener)
-                else:
-                    print('Unable to resolve Proxy hostname to IP.')
-                    return False
-            else:
-                print('Proxy URL is not valid.')
-                return False
+        if proxy:
+            self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
+            opener = request.build_opener(self.Proxy)
+            request.install_opener(opener)
                           
                                  
         if host is None:
@@ -117,14 +102,6 @@ class IpGeoLocationLib:
         """Resolve hostname to IP address"""
         try:
             return socket.gethostbyname(hostname)
-        except:
-            return False
-        
-        
-    def __isValidURL(self, url):
-        """Check if url is valid"""
-        try:
-            return urlparse(url)
         except:
             return False
     
