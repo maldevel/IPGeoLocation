@@ -1,6 +1,6 @@
 # IPGeoLocation
 
-**A Free, Open-Source Tool to retrieve IP Geolocation information**
+**A tool to retrieve IP Geolocation information**
 
 Powered by [ip-api](http://ip-api.com/docs/)
 
@@ -12,12 +12,12 @@ Python 3.x
 
 **Features**
 ---
-* Define your own custom User Agent string
-* Proxy support
-* Get Geolocation for domain/hostname
-* Pick a random User Agent string from a list in file (Every User Agent string in new line)
-* Call program with no arguments to get your ip geolocation
-* Open IP geolocation in google maps with default browser
+* Define your own custom User Agent string.
+* Proxy support.
+* Get Geolocation for domain/hostname.
+* Pick a random User Agent string from a list in file (Every User Agent string in new line).
+* Call program with no arguments to get your ip geolocation.
+* Open IP geolocation in google maps using the default browser.
 
 
 **Geolocation Information**
