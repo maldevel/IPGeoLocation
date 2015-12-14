@@ -26,19 +26,32 @@ class IpGeoLocationLib:
     """Retrieve IP Geolocation information using http://ip-api.com website"""
     
     def __init__(self):
+        self.UserAgent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:42.0) Gecko/20100101 Firefox/42.0'
+        self.URL = 'http://ip-api.com/json/{}'
         pass 
     
-    def GetInfo(self, ip):
+    def GetInfo(self, ip, userAgent=None):
         """Retrieve information"""
+        
         if self._isValidIPAddress(ip):
+            
             try:
-#req = request.Request('http://ip-api.com/json/{}'.format(ip)
-				response = request.urlopen(req)
-				if response.code == 200:
+                if userAgent != None:
+                    self.UserAgent = userAgent
+                
+                req = request.Request(self.URL.format(ip), data=None, headers={
+                  'User-Agent':self.UserAgent
+                })
+                
+                response = request.urlopen(req)
+                
+                if response.code == 200:
                     encoding = response.headers.get_content_charset()
                     return IpGeoLocation(json.loads(response.read().decode(encoding)))
+                
             except:
                 pass
+            
         return False
         
         

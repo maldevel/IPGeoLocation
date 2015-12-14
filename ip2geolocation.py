@@ -30,7 +30,9 @@ if __name__ == '__main__':
     IPGeoLocation {} - Retrieve IP Geolocation information
                 Powered by http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
+    
     parser.add_argument('-t', '--target', metavar='IP', type=str, dest='ip', default=None, help='IP Address')
+    parser.add_argument('-u', '--useragent', metavar='UserAgent', type=str, dest='useragent', default=None, help='User Agent')
     
     if len(sys.argv) == 1:
         parser.print_help()
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     ipGeoLocRequest = IpGeoLocationLib()
-    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.ip)
+    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.ip, args.useragent)
         
     if IpGeoLocObj:
         print("""
