@@ -27,6 +27,8 @@ from urllib import request
 from geolocation.IpGeoLocation import IpGeoLocation
 from urllib.parse import urlparse
 import socket
+import os.path
+import random
 
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information using http://ip-api.com website"""
@@ -36,55 +38,83 @@ class IpGeoLocationLib:
         self.URL = 'http://ip-api.com/json/{}'
         self.Proxy = request.ProxyHandler({})
     
-    def GetInfo(self, ip, userAgent=None, proxy=None):
+    
+    def GetInfo(self, host, userAgent=None, randomUserAgent=False, userAgentFileList=None, proxy=None):
         """Retrieve information"""
         
-        if ip is None:
-            return False
+        if userAgent is not None:
+            self.UserAgent = userAgent
+            
+            
+        if randomUserAgent and userAgentFileList is not None:
+            userAgent = self.__pickRandomUserAgent(userAgentFileList)
+            if(userAgent):
+                self.UserAgent = userAgent
+            else:
+                print('Unable to pick a random User Agent string from file.')
+                return False
         
-        if self.__isValidIPAddress(ip):
-            try:
-                
-                if userAgent is not None:
-                    self.UserAgent = userAgent
-                    
-
-                if proxy is not None:
-                    proxyUrl = self.__isValidURL(proxy)
-                    if(proxyUrl):
-                        ip = self.__hostnameToIP(proxyUrl.hostname)
-                        if ip:
-                            proxy = '{}://{}:{}'.format(proxyUrl.scheme, ip, proxyUrl.port)
-                            self.Proxy = request.ProxyHandler({proxyUrl.scheme:proxy})
-                            opener = request.build_opener(self.Proxy)
-                            request.install_opener(opener)
-                        else:
-                            print('Unable to resolve Proxy hostname to IP.')
-                            return False
-                    else:
-                        print('Proxy URL is not valid.')
-                        return False
-
-                req = request.Request(self.URL.format(ip), data=None, headers={
-                  'User-Agent':self.UserAgent
-                })
-
-                response = request.urlopen(req)
-
-                if response.code == 200:
-                    encoding = response.headers.get_content_charset()
-                    return IpGeoLocation(json.loads(response.read().decode(encoding)))
+        
+        if proxy is not None:
+            proxyUrl = self.__isValidURL(proxy)
+            if(proxyUrl):
+                ip = self.__hostnameToIP(proxyUrl.hostname)
+                if ip:
+                    proxy = '{}://{}:{}'.format(proxyUrl.scheme, ip, proxyUrl.port)
+                    self.Proxy = request.ProxyHandler({proxyUrl.scheme:proxy})
+                    opener = request.build_opener(self.Proxy)
+                    request.install_opener(opener)
                 else:
-                    print('Unable to contact service.')
+                    print('Unable to resolve Proxy hostname to IP.')
                     return False
-                
-            except:
-                pass
+            else:
+                print('Proxy URL is not valid.')
+                return False
+                          
+                                 
+        if host is None:
+            return self.__retrieveGeolocation('')#my ip
+        else:
+            if self.__isValidIPAddress(host):
+                return self.__retrieveGeolocation(host)
+            else:
+                ip = self.__hostnameToIP(host)#domain?
+                if ip:
+                    return self.__retrieveGeolocation(host)
+                print('Please provide a valid Domain or IP address.')
             
         return False
         
         
+    def __retrieveGeolocation(self, ip):
+        try:
+            req = request.Request(self.URL.format(ip), data=None, headers={
+              'User-Agent':self.UserAgent
+            })
+            response = request.urlopen(req)
+            if response.code == 200:
+                encoding = response.headers.get_content_charset()
+                return IpGeoLocation(json.loads(response.read().decode(encoding)))
+            else:
+                print('Unable to contact service.')
+                return False
+        except:
+            return False
+                
+                
+    def __pickRandomUserAgent(self, userAgentFileList):
+        """Pick randomly a user agent string from a provided file"""
+        try:
+            if os.path.isfile(userAgentFileList) and os.access(userAgentFileList, os.R_OK):
+                lines = [line.strip() for line in open(userAgentFileList, 'r') if line.strip()]
+                return random.choice(lines)            
+            return False
+        except:
+            return False
+        
+        
     def __hostnameToIP(self, hostname):
+        """Resolve hostname to IP address"""
         try:
             return socket.gethostbyname(hostname)
         except:
