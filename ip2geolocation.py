@@ -25,6 +25,7 @@ __author__ = 'maldevel'
 import argparse, sys
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
+from utilities.FileExporter import FileExporter
 import webbrowser
 from urllib.parse import urlparse
 import os.path
@@ -41,12 +42,24 @@ def checkProxy(url):
         return url_checked
     
     
-def checkFile(filename):
+def checkFileRead(filename):
     """Check if file exists and we have access to read it"""
     if os.path.isfile(filename) and os.access(filename, os.R_OK):
         return filename
     else:
-        raise argparse.ArgumentTypeError("Invalid {} file (File does not exist, cannot be read or it's not a file).".format(filename))
+        raise argparse.ArgumentTypeError("Invalid {} file (File does not exist, insufficient permissions or it's not a file).".format(filename))
+    
+    
+def checkFileWrite(filename):
+    """Check if we can write to file"""
+    if os.path.isfile(filename):
+        raise argparse.ArgumentTypeError("File {} already exists.".format(filename))
+    elif os.path.isdir(filename):
+        raise argparse.ArgumentTypeError("Folder provided. Please provide a valid filename.")
+    elif os.access(os.path.dirname(filename), os.W_OK):
+        return filename
+    else:
+        raise argparse.ArgumentTypeError("Cannot write to {} file (Insufficient permissions).".format(filename))
     
     
 if __name__ == '__main__':
@@ -59,9 +72,12 @@ Powered by http://ip-api.com
     parser.add_argument('-t', '--target', metavar='Host', help='The IP Address or Domain to be analyzed.')
     parser.add_argument('-u', '--useragent', metavar='User-Agent', default='IP2GeoLocation {}'.format(VERSION), help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
     parser.add_argument('-r', help='Pick User Agent strings randomly.', action='store_true')
-    parser.add_argument('-l', metavar='User-Agent list', type=checkFile, dest='user_agent_list', help='Provide a User-Agent file list. Each User-Agent string should be in a new line.')
+    parser.add_argument('-l', metavar='User-Agent list', type=checkFileRead, dest='user_agent_list', help='Please provide a User-Agent file list. Each User-Agent string should be in a new line.')
     parser.add_argument('-x', '--proxy', metavar='Proxy', type=checkProxy, help='Setup proxy server (example: http://127.0.0.1:8080).')
     parser.add_argument('-g', help='Open IP location in Google maps with default browser.', action='store_true')
+    parser.add_argument('--csv', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results in CSV format.')
+    parser.add_argument('--xml', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results in XML format.')
+    parser.add_argument('-e', '--txt', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results.')
     
     args = parser.parse_args()
     
@@ -80,6 +96,23 @@ Powered by http://ip-api.com
             if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
                 webbrowser.open('http://www.google.com/maps/place/{0},{1}/@{0},{1},16z'.
                             format(IpGeoLocObj.Latitude, IpGeoLocObj.Longtitude))
+
+
+        if args.csv:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportToCSV(IpGeoLocObj, args.csv):
+                print('Saving results to {} csv file failed.'.format(args.csv))
+            
+        if args.xml:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportToXML(IpGeoLocObj, args.xml):
+                print('Saving results to {} xml file failed.'.format(args.xml))
+            
+        if args.txt:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
+                print('Saving results to {} txt file failed.'.format(args.txt))
+            
 
         print("""
 IPGeoLocation {} - Results
