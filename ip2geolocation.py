@@ -72,12 +72,12 @@ Powered by http://ip-api.com
     parser.add_argument('-t', '--target', metavar='Host', help='The IP Address or Domain to be analyzed.')
     parser.add_argument('-u', '--useragent', metavar='User-Agent', default='IP2GeoLocation {}'.format(VERSION), help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
     parser.add_argument('-r', help='Pick User Agent strings randomly.', action='store_true')
-    parser.add_argument('-l', metavar='User-Agent list', type=checkFileRead, dest='user_agent_list', help='Please provide a User-Agent file list. Each User-Agent string should be in a new line.')
+    parser.add_argument('-l', metavar='User-Agent list', type=checkFileRead, dest='user_agent_list', help='A User-Agent list file. Each User-Agent string should be in a new line.')
     parser.add_argument('-x', '--proxy', metavar='Proxy', type=checkProxy, help='Setup proxy server (example: http://127.0.0.1:8080).')
     parser.add_argument('-g', help='Open IP location in Google maps with default browser.', action='store_true')
-    parser.add_argument('--csv', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results in CSV format.')
-    parser.add_argument('--xml', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results in XML format.')
-    parser.add_argument('-e', '--txt', metavar='Filename', type=checkFileWrite, help='Please provide a file to export results.')
+    parser.add_argument('--csv', metavar='file', type=checkFileWrite, help='File to export results in CSV format.')
+    parser.add_argument('--xml', metavar='file', type=checkFileWrite, help='File to export results in XML format.')
+    parser.add_argument('-e', '--txt', metavar='file', type=checkFileWrite, help='File to export results.')
     
     args = parser.parse_args()
     

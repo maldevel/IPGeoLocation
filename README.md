@@ -18,6 +18,7 @@ Python 3.x
 * Pick a random User Agent string from a list in file (Every User Agent string in new line).
 * Call program with no arguments to get your ip geolocation.
 * Open IP geolocation in google maps using the default browser.
+* Export results to csv, xml and txt format.
 
 
 **Geolocation Information**
@@ -41,10 +42,10 @@ Python 3.x
 ```
 $ ./ip2geolocation.py -h 
 usage: ip2geolocation.py [-h] [-t Host] [-u User-Agent] [-r]
-                         [-l User-Agent list] [-x Proxy] [-g]
+                         [-l User-Agent list] [-x Proxy] [-g] [--csv file]
+                         [--xml file] [-e file]
 
-
-IPGeoLocation 1.3
+IPGeoLocation 1.4
 A tool to retrieve IP Geolocation information.
 Powered by http://ip-api.com
 
@@ -54,12 +55,15 @@ optional arguments:
   -t Host, --target Host
                         The IP Address or Domain to be analyzed.
   -u User-Agent, --useragent User-Agent
-                        Set the User-Agent request header (default: IP2GeoLocation).
+                        Set the User-Agent request header (default: IP2GeoLocation 1.4).
   -r                    Pick User Agent strings randomly.
-  -l User-Agent list    Set tge User-Agent file list. Each User-Agent string should be in a new line.
+  -l User-Agent list    A User-Agent list file. Each User-Agent string should be in a new line.
   -x Proxy, --proxy Proxy
-                        Set the proxy server (example: http://127.0.0.1:8080).
+                        Setup proxy server (example: http://127.0.0.1:8080).
   -g                    Open IP location in Google maps with default browser.
+  --csv file            File to export results in CSV format.
+  --xml file            File to export results in XML format.
+  -e file, --txt file   File to export results.
 ```
   
 
@@ -82,3 +86,12 @@ optional arguments:
 
 **Retrieve IP geolocation and open location in Google maps with default browser**
 * ./ip2geolocation.py -t x.x.x.x -g
+
+**Export results to CSV file**
+* ./ip2geolocation.py -t x.x.x.x --csv /path/to/file.csv
+
+**Export results to XML file**
+* ./ip2geolocation.py -t x.x.x.x --xml /path/to/file.xml
+
+**Export results to TXT file**
+* ./ip2geolocation.py -t x.x.x.x -e /path/to/file.txt
