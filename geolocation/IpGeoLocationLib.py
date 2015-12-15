@@ -50,7 +50,7 @@ class IpGeoLocationLib:
                 print('Unable to pick a random User Agent string from file.')
                 return False
         
-        
+
         if proxy:
             self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
             opener = request.build_opener(self.Proxy)
