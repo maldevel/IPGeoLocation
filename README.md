@@ -101,8 +101,8 @@ optional arguments:
 **Export results to TXT file**
 * ./ip2geolocation.py -t x.x.x.x -e /path/to/results.txt
 
-**Retrieve IP Geolocation for multiple targets**
+**Retrieve IP Geolocation of multiple targets**
 * ./ip2geolocation.py -T /path/to/targets/targets.txt
 
-**Retrieve IP Geolocation for multiple targets and export to xml**
+**Retrieve IP Geolocation of multiple targets and export to xml**
 * ./ip2geolocation.py -T /path/to/targets/targets.txt --xml /path/to/results.xml
