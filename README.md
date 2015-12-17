@@ -14,7 +14,7 @@ Python 3.x
 ---
 * Define your own custom User Agent string.
 * Proxy support.
-* Retrieve Geolocation of ip ordomain.
+* Retrieve Geolocation of IP or Domain.
 * Pick a random User-Agent string from file. Each User Agent string in new line.
 * Run program with no arguments to get your IP Geolocation.
 * Open IP geolocation in Google Maps using the default browser.
