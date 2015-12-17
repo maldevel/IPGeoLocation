@@ -25,13 +25,14 @@ __author__ = 'maldevel'
 import argparse, sys
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
+from geolocation.IpGeoLocation import IpGeoLocation
 from utilities.FileExporter import FileExporter
 import webbrowser
 from urllib.parse import urlparse
 import os.path
 
 
-VERSION = '1.4'
+VERSION = '1.5'
 
 
 def checkProxy(url):
@@ -55,48 +56,133 @@ def checkFileWrite(filename):
     if os.path.isfile(filename):
         raise argparse.ArgumentTypeError("File {} already exists.".format(filename))
     elif os.path.isdir(filename):
-        raise argparse.ArgumentTypeError("Folder provided. Please provide a valid filename.")
+        raise argparse.ArgumentTypeError("Folder provided. Please provide a file.")
     elif os.access(os.path.dirname(filename), os.W_OK):
         return filename
     else:
-        raise argparse.ArgumentTypeError("Cannot write to {} file (Insufficient permissions).".format(filename))
+        raise argparse.ArgumentTypeError("Unable to write to {} file (Insufficient permissions).".format(filename))
+
+
+def printIPGeoLocation(ipGeoLocation):
+    print("""
+    Target: {}
+    
+    IP: {}
+    ASN: {}
+    City: {}
+    Country: {}
+    Country Code: {}
+    ISP: {}
+    Latitude: {}
+    Longtitude: {}
+    Organization: {}
+    Region Code: {}
+    Region Name: {}
+    Timezone: {}
+    Zip Code: {}
+    Google Maps: {}
+            """.format(ipGeoLocation.Query,
+                   ipGeoLocation.IP,
+                   ipGeoLocation.ASN,
+                   ipGeoLocation.City, 
+                   ipGeoLocation.Country,
+                   ipGeoLocation.CountryCode,
+                   ipGeoLocation.ISP,
+                   ipGeoLocation.Latitude,
+                   ipGeoLocation.Longtitude,
+                   ipGeoLocation.Organization,
+                   ipGeoLocation.Region,
+                   ipGeoLocation.RegionName,
+                   ipGeoLocation.Timezone,
+                   ipGeoLocation.Zip,
+                   ipGeoLocation.GoogleMapsLink
+               )#.encode('cp737', errors='replace').decode('cp737')
+       )
     
     
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description="""IPGeoLocation {} 
-A tool to retrieve IP Geolocation information.
-Powered by http://ip-api.com
+Retrieve IP Geolocation information from http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
     
-    parser.add_argument('-t', '--target', metavar='Host', help='The IP Address or Domain to be analyzed.')
-    parser.add_argument('-u', '--useragent', metavar='User-Agent', default='IP2GeoLocation {}'.format(VERSION), help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
-    parser.add_argument('-r', help='Pick User Agent strings randomly.', action='store_true')
-    parser.add_argument('-l', metavar='User-Agent list', type=checkFileRead, dest='user_agent_list', help='A User-Agent list file. Each User-Agent string should be in a new line.')
-    parser.add_argument('-x', '--proxy', metavar='Proxy', type=checkProxy, help='Setup proxy server (example: http://127.0.0.1:8080).')
+    #target
+    parser.add_argument('-t', '--target', metavar='host', help='IP Address or Domain to be analyzed.')
+    parser.add_argument('-T', '--tlist', metavar='file', type=checkFileRead, help='A list of IPs/Domains targets, each target in new line.')
+    
+    #user-agent
+    parser.add_argument('-u', '--useragent', metavar='user-agent', default='IP2GeoLocation {}'.format(VERSION), help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
+    parser.add_argument('-U', '--ulist', metavar='file', type=checkFileRead, help='A list of User-Agent strings, each string in new line.')
+    
+    #misc
+    parser.add_argument('-r', help='Pick User-Agent strings randomly from a file.', action='store_true')
     parser.add_argument('-g', help='Open IP location in Google maps with default browser.', action='store_true')
-    parser.add_argument('--csv', metavar='file', type=checkFileWrite, help='File to export results in CSV format.')
-    parser.add_argument('--xml', metavar='file', type=checkFileWrite, help='File to export results in XML format.')
-    parser.add_argument('-e', '--txt', metavar='file', type=checkFileWrite, help='File to export results.')
+    
+    #anon
+    parser.add_argument('-x', '--proxy', metavar='url', type=checkProxy, help='Setup proxy server (example: http://127.0.0.1:8080).')
+    
+    #export
+    parser.add_argument('--csv', metavar='file', type=checkFileWrite, help='Export results in CSV format.')
+    parser.add_argument('--xml', metavar='file', type=checkFileWrite, help='Export results in XML format.')
+    parser.add_argument('-e', '--txt', metavar='file', type=checkFileWrite, help='Export results.')
     
     args = parser.parse_args()
     
     
-    if(args.r and args.user_agent_list is None):
-        print('You have to provide a file with User Agent strings. Each User agent string should be in a new line.')
+    if(args.target is not None and args.tlist is not None):
+        print("You can provide either a single target(-t) or a list of targets(-T). Not both!")
         sys.exit(2)
+        
+    
+    if(args.tlist is not None and args.g):
+        print("Google maps location is working only with single targets.")
+        sys.exit(3)
+        
+        
+    if(args.r and args.ulist is None):
+        print("You didn't provide a file with User-Agent strings, each string in a new line.")
+        sys.exit(4)
     
     
     ipGeoLocRequest = IpGeoLocationLib()
-    IpGeoLocObj = ipGeoLocRequest.GetInfo(args.target, args.useragent, args.r, args.user_agent_list, args.proxy)
+    result = ipGeoLocRequest.GetInfo(args.target, args.useragent, args.tlist, args.r, args.ulist, args.proxy)
 
 
-    if IpGeoLocObj:
+    IpGeoLocObj = None
+    IpGeoLocObjs = None
+    
+    if type(result) is IpGeoLocation:
+        IpGeoLocObj = result
+    elif type(result) is list:
+        IpGeoLocObjs = result
+    
+    
+    if IpGeoLocObjs is not None:
+        if args.csv:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv):
+                print('Saving results to {} csv file failed.'.format(args.csv))
+            
+        if args.xml:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
+                print('Saving results to {} xml file failed.'.format(args.xml))
+            
+        if args.txt:
+            fileExporter = FileExporter()
+            if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
+                print('Saving results to {} txt file failed.'.format(args.txt))
+        
+        print('IPGeoLocation {} - Results'.format(VERSION))
+        for obj in IpGeoLocObjs:
+            if obj:
+                printIPGeoLocation(obj)
+        
+        
+    elif IpGeoLocObj is not None:
         if args.g:
             if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
-                webbrowser.open('http://www.google.com/maps/place/{0},{1}/@{0},{1},16z'.
-                            format(IpGeoLocObj.Latitude, IpGeoLocObj.Longtitude))
-
+                webbrowser.open(IpGeoLocObj.GoogleMapsLink)
 
         if args.csv:
             fileExporter = FileExporter()
@@ -113,35 +199,6 @@ Powered by http://ip-api.com
             if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
                 print('Saving results to {} txt file failed.'.format(args.txt))
             
-
-        print("""
-IPGeoLocation {} - Results
-        
-    IP: {}
-    ASN: {}
-    City: {}
-    Country: {}
-    Country Code: {}
-    ISP: {}
-    Latitude: {}
-    Longtitude: {}
-    Organization: {}
-    Region Code: {}
-    Region Name: {}
-    Timezone: {}
-    Zip Code: {}
-            """.format(VERSION,
-                   IpGeoLocObj.IP,
-                   IpGeoLocObj.ASN,
-                   IpGeoLocObj.City, 
-                   IpGeoLocObj.Country,
-                   IpGeoLocObj.CountryCode,
-                   IpGeoLocObj.ISP,
-                   IpGeoLocObj.Latitude,
-                   IpGeoLocObj.Longtitude,
-                   IpGeoLocObj.Organization,
-                   IpGeoLocObj.Region,
-                   IpGeoLocObj.RegionName,
-                   IpGeoLocObj.Timezone,
-                   IpGeoLocObj.Zip)#.encode('cp737', errors='replace').decode('cp737')
-               )
+        print('IPGeoLocation {} - Results'.format(VERSION))
+        printIPGeoLocation(IpGeoLocObj)
+    

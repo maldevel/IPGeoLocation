@@ -26,7 +26,8 @@ __author__ = 'maldevel'
 class IpGeoLocation:
     """Represents an IP Geolocation information object"""
     
-    def __init__(self, jsonData = None):
+    def __init__(self, query, jsonData = None):
+        self.Query = query
         self.ASN = '-'
         self.City = '-'
         self.Country = '-'
@@ -41,7 +42,8 @@ class IpGeoLocation:
         self.Status = '-'
         self.Timezone = '-'
         self.Zip = '-'
-            
+        self.GoogleMapsLink = ''
+        
         if jsonData != None:
             if type(jsonData) is dict:
                 if 'as' in jsonData: 
@@ -86,3 +88,16 @@ class IpGeoLocation:
                 if 'zip' in jsonData:
                     self.Zip = jsonData['zip']
                 
+                if type(self.Latitude) == float and type(self.Longtitude) == float: 
+                    self.GoogleMapsLink = 'http://www.google.com/maps/place/{0},{1}/@{0},{1},16z'.format(self.Latitude, self.Longtitude)
+                    
+                    
+    def ToDict(self):
+        #self.__dict__.
+        return {'Target':self.Query, 'IP':self.IP, 'ASN':self.ASN, 'City':self.City, 
+                    'Country':self.Country, 'Country Code':self.CountryCode, 'ISP':self.ISP, 
+                    'Latitude':str(self.Latitude), 'Longtitude':str(self.Longtitude), 
+                    'Organization':self.Organization, 'Region':self.Region, 
+                    'Region Name':self.RegionName, 'Timezone':self.Timezone, 
+                    'Zip':self.Zip, 'Google Maps':self.GoogleMapsLink
+                } 

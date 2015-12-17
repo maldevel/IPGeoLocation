@@ -28,22 +28,23 @@ from geolocation.IpGeoLocation import IpGeoLocation
 import socket
 import os.path
 import random
+from time import sleep
 
 class IpGeoLocationLib:
-    """Retrieve IP Geolocation information using http://ip-api.com website"""
+    """Retrieve IP Geolocation information from http://ip-api.com"""
     
     def __init__(self):
         self.URL = 'http://ip-api.com/json/{}'
         self.Proxy = request.ProxyHandler({})
     
     
-    def GetInfo(self, host, userAgent, randomUserAgent=False, userAgentFileList=None, proxy=False):
+    def GetInfo(self, target, userAgent, targetList=None, randomUserAgent=False, uAgentList=None, proxy=False):
         """Retrieve information"""
         
         self.UserAgent = userAgent            
 
-        if randomUserAgent and userAgentFileList is not None:
-            userAgent = self.__pickRandomUserAgent(userAgentFileList)
+        if randomUserAgent and uAgentList is not None:
+            userAgent = self.__pickRandomUserAgent(uAgentList)
             if(userAgent):
                 self.UserAgent = userAgent
             else:
@@ -56,32 +57,71 @@ class IpGeoLocationLib:
             opener = request.build_opener(self.Proxy)
             request.install_opener(opener)
                           
-                                 
-        if host is None:
-            return self.__retrieveGeolocation('')#my ip
-        else:
-            if self.__isValidIPAddress(host):
-                return self.__retrieveGeolocation(host)
-            else:
-                ip = self.__hostnameToIP(host)#domain?
-                if ip:
-                    return self.__retrieveGeolocation(host)
-                print('Please provide a valid Domain or IP address.')
+                          
+        if targetList is not None:
+            return self.__retrieveGeolocations(targetList)
+        else:         
+            #if target is None:
+            return self.__retrieveGeolocation(target)#my ip
+            #else:
+            #    if self.__isValidIPAddress(target):
+            #        return self.__retrieveGeolocation(target)
+            #    else:
+            #        ip = self.__hostnameToIP(target)#domain?
+            #        if ip:
+            #            return self.__retrieveGeolocation(ip)
+            #        print('Please provide a valid Domain or IP address.')
+                    
             
         return False
         
         
-    def __retrieveGeolocation(self, ip):
+    def __retrieveGeolocations (self, targetsFile):
+        """Retrieve IP Geolocation for each target in the file list"""
         try:
-            req = request.Request(self.URL.format(ip), data=None, headers={
+            IpGeoLocObjs = []
+
+            if os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
+                targets = [line.strip() for line in open(targetsFile, 'r') if line.strip()]
+                
+                for target in targets:
+                    IpGeoLocObjs.append(self.__retrieveGeolocation(target))
+                    if len(targets)>=150:
+                        sleep(.500)#1/2 sec - ip-api will automatically ban any IP address doing over 150 requests per minute
+                    
+            return IpGeoLocObjs
+        except:
+            return False
+        
+        
+    def __retrieveGeolocation(self, target):
+        """Retrieve IP Geolocation for single target"""
+        try:
+            
+            if target is None:
+                query = 'My IP'
+                target=''
+            elif self.__isValidIPAddress(target):
+                query = target
+            else:
+                ip = self.__hostnameToIP(target)#domain?
+                if not ip:
+                    print('Please provide a valid Domain or IP address.')
+                    return False
+                query = target
+                target = ip
+            
+            req = request.Request(self.URL.format(target), data=None, headers={
               'User-Agent':self.UserAgent
             })
+            
             response = request.urlopen(req)
+            
             if response.code == 200:
                 encoding = response.headers.get_content_charset()
-                return IpGeoLocation(json.loads(response.read().decode(encoding)))
+                return IpGeoLocation(query, json.loads(response.read().decode(encoding)))
             else:
-                print('Unable to contact service.')
+                #print('Unable to contact service.')
                 return False
         except:
             return False
