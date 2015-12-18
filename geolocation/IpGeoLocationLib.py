@@ -61,17 +61,7 @@ class IpGeoLocationLib:
         if targetList is not None:
             return self.__retrieveGeolocations(targetList)
         else:         
-            #if target is None:
             return self.__retrieveGeolocation(target)#my ip
-            #else:
-            #    if self.__isValidIPAddress(target):
-            #        return self.__retrieveGeolocation(target)
-            #    else:
-            #        ip = self.__hostnameToIP(target)#domain?
-            #        if ip:
-            #            return self.__retrieveGeolocation(ip)
-            #        print('Please provide a valid Domain or IP address.')
-                    
             
         return False
         
