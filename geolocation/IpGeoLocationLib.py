@@ -29,6 +29,8 @@ import socket
 import os.path
 import random
 from time import sleep
+from utilities import MyExceptions 
+
 
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
@@ -36,96 +38,168 @@ class IpGeoLocationLib:
     def __init__(self):
         self.URL = 'http://ip-api.com/json/{}'
         self.Proxy = request.ProxyHandler({})
-    
-    
-    def GetInfo(self, target, userAgent, targetList=None, randomUserAgent=False, uAgentList=None, proxy=False):
+        self.RandomUA = False
+        self.UserAgentFile = None
+        self.UserAgents = None
+        self.TargetsFile = None
+        self.Targets = None
+        self.Verbose = False
+        self.NoPrint = False
+        
+    def GetInfo(self, target, userAgent, targetsFile=None, rUserAgent=False, userAgentFile=None, proxy=False, noprint=False, verbose=False):
         """Retrieve information"""
         
-        self.UserAgent = userAgent            
-
-        if randomUserAgent and uAgentList is not None:
-            userAgent = self.__pickRandomUserAgent(uAgentList)
-            if(userAgent):
-                self.UserAgent = userAgent
-            else:
-                print('Unable to pick a random User Agent string from file.')
-                return False
+        self.UserAgent = userAgent
+        self.RandomUA = rUserAgent
+        self.Verbose = verbose
+        self.NoPrint = noprint
         
-
-        if proxy:
-            self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
-            opener = request.build_opener(self.Proxy)
-            request.install_opener(opener)
-                          
-                          
-        if targetList is not None:
-            return self.__retrieveGeolocations(targetList)
-        else:         
-            return self.__retrieveGeolocation(target)#my ip
+        try:
             
+            if userAgentFile and os.path.isfile(userAgentFile) and os.access(userAgentFile, os.R_OK):
+                self.UserAgentFile = userAgentFile
+                if self.Verbose:
+                    self.__print('Loading User-Agent strings from file..')
+                self.__loadUserAgents()
+            
+            if targetsFile and os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
+                self.TargetsFile = targetsFile
+
+            if proxy:
+                self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
+                opener = request.build_opener(self.Proxy)
+                request.install_opener(opener)
+                if self.Verbose:
+                    self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
+            
+            
+            if self.TargetsFile:
+                results = self.__retrieveGeolocations()
+                
+                return results
+            
+            else:
+                if self.Verbose:
+                    self.__print('Retrieving target Geolocation..')
+                    
+                result = self.__retrieveGeolocation(target)
+                
+                return result
+                
+            
+        except MyExceptions.UserAgentFileEmptyError:
+            self.__printError("User-Agent strings file is empty!")
+        except MyExceptions.InvalidTargetError:
+            self.__printError('Please provide a valid Domain or IP address.')
+        except MyExceptions.TargetsFileEmptyError:
+            self.__printError('Targets file is empty!.')
+        except MyExceptions.UserAgentFileNotSpecifiedError:
+            self.__printError('User-Agent strings file has not been provided!.')
+        except MyExceptions.TargetsFileNotSpecifiedError:
+            self.__printError('Targets file has not been provided!.')
+        except:
+            self.__printError("An unexpected error occurred")
+        
         return False
         
         
-    def __retrieveGeolocations (self, targetsFile):
-        """Retrieve IP Geolocation for each target in the file list"""
-        try:
-            IpGeoLocObjs = []
-
-            if os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
-                targets = [line.strip() for line in open(targetsFile, 'r') if line.strip()]
-                
-                for target in targets:
-                    IpGeoLocObjs.append(self.__retrieveGeolocation(target))
-                    if len(targets)>=150:
-                        sleep(.500)#1/2 sec - ip-api will automatically ban any IP address doing over 150 requests per minute
+    def __retrieveGeolocations (self):
+        """Retrieve IP Geolocation for each target in the list"""
+        IpGeoLocObjs = []
+ 
+        if self.Verbose:
+            self.__print('Loading targets from file..')
+            
+        self.__loadTargets()
                     
-            return IpGeoLocObjs
-        except:
-            return False
+        if self.Verbose:
+            self.__print('Retrieving targets Geolocations..')
+                    
+        for target in self.Targets:
+            IpGeoLocObjs.append(self.__retrieveGeolocation(target))
+            if len(self.Targets)>=150:
+                sleep(.500) #1/2 sec - ip-api will automatically ban any IP address doing over 150 requests per minute
+                
+        return IpGeoLocObjs
         
         
     def __retrieveGeolocation(self, target):
         """Retrieve IP Geolocation for single target"""
-        try:
+        
+        if not target:
+            query = 'My IP'
+            target=''
             
-            if target is None:
-                query = 'My IP'
-                target=''
-            elif self.__isValidIPAddress(target):
-                query = target
-            else:
-                ip = self.__hostnameToIP(target)#domain?
-                if not ip:
-                    print('Please provide a valid Domain or IP address.')
-                    return False
-                query = target
-                target = ip
+        elif self.__isValidIPAddress(target):
+            query = target
             
-            req = request.Request(self.URL.format(target), data=None, headers={
-              'User-Agent':self.UserAgent
-            })
+        else:
+            ip = self.__hostnameToIP(target)#domain?
+            if not ip:
+                raise MyExceptions.InvalidTargetError()
             
-            response = request.urlopen(req)
-            
-            if response.code == 200:
-                encoding = response.headers.get_content_charset()
-                return IpGeoLocation(query, json.loads(response.read().decode(encoding)))
-            else:
-                #print('Unable to contact service.')
-                return False
-        except:
-            return False
+            query = target
+            target = ip
+        
+        if self.RandomUA and self.UserAgentFile:
+            self.__pickRandomUserAgent()
+        
+        if self.Verbose:
+            self.__print('User-Agent string used: {}.'.format(self.UserAgent))
                 
+        req = request.Request(self.URL.format(target), data=None, headers={
+          'User-Agent':self.UserAgent
+        })
+        
+        response = request.urlopen(req)
+        
+        if response.code == 200:
+            encoding = response.headers.get_content_charset()
+            if self.Verbose:
+                self.__print('Geolocation information has been retrieved.')
                 
-    def __pickRandomUserAgent(self, userAgentFileList):
-        """Pick randomly a user agent string from a provided file"""
-        try:
-            if os.path.isfile(userAgentFileList) and os.access(userAgentFileList, os.R_OK):
-                lines = [line.strip() for line in open(userAgentFileList, 'r') if line.strip()]
-                return random.choice(lines)            
-            return False
-        except:
-            return False
+            ipGeoLocObj = IpGeoLocation(query, json.loads(response.read().decode(encoding)))
+        
+            if not self.NoPrint:
+                self.__printIPGeoLocation(ipGeoLocObj)
+                
+            return ipGeoLocObj
+
+        return False
+    
+    
+    def __loadUserAgents(self):
+        """Load user-agent strings from file"""
+        if not self.UserAgentFile:
+            raise MyExceptions.UserAgentFileNotSpecifiedError()
+        
+        self.UserAgents = [line.strip() for line in open(self.UserAgentFile, 'r') if line.strip()]
+        if self.Verbose:
+            self.__print('User-Agent strings loaded.')
+                
+        if len(self.UserAgents) == 0:
+            raise MyExceptions.UserAgentFileEmptyError()
+        
+        
+    def __loadTargets(self):
+        """Load targets from file"""
+        if not self.TargetsFile:
+            raise MyExceptions.TargetsFileNotSpecifiedError()
+        
+        self.Targets = [line.strip() for line in open(self.TargetsFile, 'r') if line.strip()]
+        if self.Verbose:
+            self.__print('Targets loaded.')
+            
+        if len(self.Targets) == 0:
+            raise MyExceptions.TargetsFileEmptyError()
+
+ 
+    def __pickRandomUserAgent(self):
+        """Pick randomly a user-agent string from list"""
+        if not self.UserAgents or len(self.UserAgents) == 0:
+            raise MyExceptions.UserAgentFileEmptyError()
+        
+        self.UserAgent = random.choice(self.UserAgents)
         
         
     def __hostnameToIP(self, hostname):
@@ -144,3 +218,51 @@ class IpGeoLocationLib:
         except:
             return False
         
+    
+    def __print(self, message, newLine=False):
+        if newLine:
+            print('{}\n'.format(message))
+        else:
+            print('{}'.format(message))
+        
+        
+    def __printError(self, message):
+        print('Error: {}\n'.format(message))
+        
+        
+    def __printIPGeoLocation(self, ipGeoLocation):
+        print("""
+        Target: {}
+        
+        IP: {}
+        ASN: {}
+        City: {}
+        Country: {}
+        Country Code: {}
+        ISP: {}
+        Latitude: {}
+        Longtitude: {}
+        Organization: {}
+        Region Code: {}
+        Region Name: {}
+        Timezone: {}
+        Zip Code: {}
+        Google Maps: {}
+                """.format(ipGeoLocation.Query,
+                       ipGeoLocation.IP,
+                       ipGeoLocation.ASN,
+                       ipGeoLocation.City, 
+                       ipGeoLocation.Country,
+                       ipGeoLocation.CountryCode,
+                       ipGeoLocation.ISP,
+                       ipGeoLocation.Latitude,
+                       ipGeoLocation.Longtitude,
+                       ipGeoLocation.Organization,
+                       ipGeoLocation.Region,
+                       ipGeoLocation.RegionName,
+                       ipGeoLocation.Timezone,
+                       ipGeoLocation.Zip,
+                       ipGeoLocation.GoogleMapsLink
+                   )#.encode('cp737', errors='replace').decode('cp737')
+           )
+    

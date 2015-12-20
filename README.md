@@ -12,15 +12,14 @@ Python 3.x
 
 **Features**
 ---
-* Retrieve Geolocation of IP or Domain.
-* Run program with no arguments to get your IP Geolocation.
-* Retrieve Geolocation of multiple IPs or Domains loaded from file. Each target in new line.
+* Retrieve IP or Domain Geolocation.
+* Retrieve your own IP Geolocation.
+* Retrieve Geolocation for IPs or Domains loaded from file. Each target in new line.
 * Define your own custom User Agent string.
+* Select random User-Agent strings from file. Each User Agent string in new line.
 * Proxy support.
-* Pick a random User-Agent string from file. Each User Agent string in new line.
 * Open IP geolocation in Google Maps using the default browser.
 * Export results to csv, xml and txt format.
-
 
 **Geolocation Information**
 ---
@@ -42,37 +41,41 @@ Python 3.x
 ---
 ```
 $ ./ip2geolocation.py -h 
-usage: ip2geolocation.py [-h] [-t host] [-T file] [-u user-agent] [-U file]
-                         [-r] [-g] [-x url] [--csv file] [--xml file]
-                         [-e file]
+usage: ip2geolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent] [-r]
+                         [-U file] [-g] [--no-print] [-v] [-x PROXY] [-e file]
+                         [-ec file] [-ex file]
 
-IPGeoLocation 1.5
+IPGeoLocation 1.6
 Retrieve IP Geolocation information from http://ip-api.com
 
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t host, --target host
+  -m, --my-ip           Get Geolocation info for my IP address.
+  -t TARGET, --target TARGET
                         IP Address or Domain to be analyzed.
   -T file, --tlist file
                         A list of IPs/Domains targets, each target in new line.
-  -u user-agent, --useragent user-agent
-                        Set the User-Agent request header (default: IP2GeoLocation 1.5).
+  -u User-Agent, --user-agent User-Agent
+                        Set the User-Agent request header (default: IP2GeoLocation 1.6).
+  -r                    Pick User-Agent strings randomly from a file.
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
-  -r                    Pick User-Agent strings randomly from a file.
   -g                    Open IP location in Google maps with default browser.
-  -x url, --proxy url   Setup proxy server (example: http://127.0.0.1:8080).
-  --csv file            Export results in CSV format.
-  --xml file            Export results in XML format.
+  --no-print            Do not print results to terminal.
+  -v, --verbose         Enable verbose printing.
+  -x PROXY, --proxy PROXY
+                        Setup proxy server (example: http://127.0.0.1:8080)
   -e file, --txt file   Export results.
+  -ec file, --csv file  Export results in CSV format.
+  -ex file, --xml file  Export results in XML format.
 ```
   
 
 **Examples**
 ---
 **Retrieve your IP Geolocation**
-* ./ip2geolocation.py
+* ./ip2geolocation.py -m
 
 **Retrieve IP Geolocation**
 * ./ip2geolocation.py -t x.x.x.x
@@ -101,8 +104,8 @@ optional arguments:
 **Export results to TXT file**
 * ./ip2geolocation.py -t x.x.x.x -e /path/to/results.txt
 
-**Retrieve IP Geolocation of multiple targets**
+**Retrieve IP Geolocation for many targets**
 * ./ip2geolocation.py -T /path/to/targets/targets.txt
 
-**Retrieve IP Geolocation of multiple targets and export to xml**
+**Retrieve IP Geolocation for many targets and export results to xml**
 * ./ip2geolocation.py -T /path/to/targets/targets.txt --xml /path/to/results.xml

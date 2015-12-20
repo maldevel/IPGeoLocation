@@ -32,7 +32,7 @@ from urllib.parse import urlparse
 import os.path
 
 
-VERSION = '1.5'
+VERSION = '1.6'
 
 
 def checkProxy(url):
@@ -61,43 +61,17 @@ def checkFileWrite(filename):
         return filename
     else:
         raise argparse.ArgumentTypeError("Unable to write to {} file (Insufficient permissions).".format(filename))
-
-
-def printIPGeoLocation(ipGeoLocation):
-    print("""
-    Target: {}
     
-    IP: {}
-    ASN: {}
-    City: {}
-    Country: {}
-    Country Code: {}
-    ISP: {}
-    Latitude: {}
-    Longtitude: {}
-    Organization: {}
-    Region Code: {}
-    Region Name: {}
-    Timezone: {}
-    Zip Code: {}
-    Google Maps: {}
-            """.format(ipGeoLocation.Query,
-                   ipGeoLocation.IP,
-                   ipGeoLocation.ASN,
-                   ipGeoLocation.City, 
-                   ipGeoLocation.Country,
-                   ipGeoLocation.CountryCode,
-                   ipGeoLocation.ISP,
-                   ipGeoLocation.Latitude,
-                   ipGeoLocation.Longtitude,
-                   ipGeoLocation.Organization,
-                   ipGeoLocation.Region,
-                   ipGeoLocation.RegionName,
-                   ipGeoLocation.Timezone,
-                   ipGeoLocation.Zip,
-                   ipGeoLocation.GoogleMapsLink
-               )#.encode('cp737', errors='replace').decode('cp737')
-       )
+    
+def printInfo( message, newLine=False):
+    if newLine:
+        print('{}\n'.format(message))
+    else:
+        print('{}'.format(message))
+        
+        
+def printError( message):
+    print('Error: {}\n'.format(message))
     
     
 if __name__ == '__main__':
@@ -106,47 +80,106 @@ if __name__ == '__main__':
 Retrieve IP Geolocation information from http://ip-api.com
     """.format(VERSION), formatter_class=RawTextHelpFormatter)
     
-    #target
-    parser.add_argument('-t', '--target', metavar='host', help='IP Address or Domain to be analyzed.')
-    parser.add_argument('-T', '--tlist', metavar='file', type=checkFileRead, help='A list of IPs/Domains targets, each target in new line.')
     
-    #user-agent
-    parser.add_argument('-u', '--useragent', metavar='user-agent', default='IP2GeoLocation {}'.format(VERSION), help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
-    parser.add_argument('-U', '--ulist', metavar='file', type=checkFileRead, help='A list of User-Agent strings, each string in new line.')
+    #pick target/s
+    parser.add_argument('-m', '--my-ip',  
+                        dest='myip',
+                        action='store_true', 
+                        help='Get Geolocation info for my IP address.')
     
-    #misc
-    parser.add_argument('-r', help='Pick User-Agent strings randomly from a file.', action='store_true')
-    parser.add_argument('-g', help='Open IP location in Google maps with default browser.', action='store_true')
+    parser.add_argument('-t', '--target',  
+                        help='IP Address or Domain to be analyzed.')
     
-    #anon
-    parser.add_argument('-x', '--proxy', metavar='url', type=checkProxy, help='Setup proxy server (example: http://127.0.0.1:8080).')
+    parser.add_argument('-T', '--tlist', 
+                        metavar='file',
+                        type=checkFileRead, 
+                        help='A list of IPs/Domains targets, each target in new line.')
     
-    #export
-    parser.add_argument('--csv', metavar='file', type=checkFileWrite, help='Export results in CSV format.')
-    parser.add_argument('--xml', metavar='file', type=checkFileWrite, help='Export results in XML format.')
-    parser.add_argument('-e', '--txt', metavar='file', type=checkFileWrite, help='Export results.')
+    
+    #user-agent configuration
+    parser.add_argument('-u', '--user-agent', 
+                        metavar='User-Agent', 
+                        dest='uagent',
+                        default='IP2GeoLocation {}'.format(VERSION), 
+                        help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
+    
+    parser.add_argument('-r', 
+                        action='store_true',
+                        help='Pick User-Agent strings randomly from a file.')
+    
+    parser.add_argument('-U', '--ulist', 
+                        metavar='file', 
+                        type=checkFileRead, 
+                        help='A list of User-Agent strings, each string in new line.')
+    
+    
+    #misc options
+    parser.add_argument('-g', 
+                        action='store_true', 
+                        help='Open IP location in Google maps with default browser.')
+    
+    parser.add_argument('--no-print', 
+                        action='store_true', 
+                        help='Do not print results to terminal.')
+    
+    parser.add_argument('-v', '--verbose', 
+                        action='store_true', 
+                        help='Enable verbose printing.')
+    
+    
+    #anonymity options
+    parser.add_argument('-x', '--proxy', 
+                        type=checkProxy, 
+                        help='Setup proxy server (example: http://127.0.0.1:8080)')
+    
+    
+    #export options
+    parser.add_argument('-e', '--txt', 
+                        metavar='file', 
+                        type=checkFileWrite, 
+                        help='Export results.')
+    
+    parser.add_argument('-ec', '--csv', 
+                        metavar='file', 
+                        type=checkFileWrite, 
+                        help='Export results in CSV format.')
+    
+    parser.add_argument('-ex', '--xml', 
+                        metavar='file', 
+                        type=checkFileWrite, 
+                        help='Export results in XML format.')
+    
     
     args = parser.parse_args()
     
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+      
+    if(args.target and args.tlist):
+        printError("You can request Geolocation information either for a single target(-t) or a list of targets(-T). Not both!")
+        sys.exit(1)
+        
+    if(args.target and args.myip):
+        printError("You can request Geolocation information either for a single target(-t) or your own IP address. Not both!")
+        sys.exit(1)
+        
+    if(args.tlist and args.myip):
+        printError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!")
+        sys.exit(1)
     
-    if(args.target is not None and args.tlist is not None):
-        print("You can provide either a single target(-t) or a list of targets(-T). Not both!")
+    if(args.tlist and args.g):
+        printError("Google maps location is working only with single targets.")
         sys.exit(2)
         
-    
-    if(args.tlist is not None and args.g):
-        print("Google maps location is working only with single targets.")
+        
+    if(args.r and not args.ulist):
+        printError("You haven't provided a User-Agent strings file, each string in a new line.")
         sys.exit(3)
-        
-        
-    if(args.r and args.ulist is None):
-        print("You didn't provide a file with User-Agent strings, each string in a new line.")
-        sys.exit(4)
     
     
     ipGeoLocRequest = IpGeoLocationLib()
-    result = ipGeoLocRequest.GetInfo(args.target, args.useragent, args.tlist, args.r, args.ulist, args.proxy)
-
+    result = ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, args.r, args.ulist, args.proxy, args.no_print, args.verbose)
 
     IpGeoLocObj = None
     IpGeoLocObjs = None
@@ -155,50 +188,59 @@ Retrieve IP Geolocation information from http://ip-api.com
         IpGeoLocObj = result
     elif type(result) is list:
         IpGeoLocObjs = result
-    
+    else:
+        printError("Retrieving IP Geolocation information failed.")
+        sys.exit(5)
+        
     
     if IpGeoLocObjs is not None:
         if args.csv:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} csv file.'.format(args.csv))
             if not fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv):
-                print('Saving results to {} csv file failed.'.format(args.csv))
+                printError('Saving results to {} csv file failed.'.format(args.csv))
             
         if args.xml:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} xml file.'.format(args.xml))
             if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
-                print('Saving results to {} xml file failed.'.format(args.xml))
+                printError('Saving results to {} xml file failed.'.format(args.xml))
             
         if args.txt:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} txt file.'.format(args.txt))
             if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
-                print('Saving results to {} txt file failed.'.format(args.txt))
+                printError('Saving results to {} txt file failed.'.format(args.txt))
         
-        print('IPGeoLocation {} - Results'.format(VERSION))
-        for obj in IpGeoLocObjs:
-            if obj:
-                printIPGeoLocation(obj)
-        
-        
+                
     elif IpGeoLocObj is not None:
         if args.g:
             if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
+                if args.verbose:
+                    printInfo('Opening Geolocation in browser..'.format(args.csv))
                 webbrowser.open(IpGeoLocObj.GoogleMapsLink)
 
         if args.csv:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} csv file.'.format(args.csv))
             if not fileExporter.ExportToCSV(IpGeoLocObj, args.csv):
-                print('Saving results to {} csv file failed.'.format(args.csv))
+                printError('Saving results to {} csv file failed.'.format(args.csv))
             
         if args.xml:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} xml file.'.format(args.xml))
             if not fileExporter.ExportToXML(IpGeoLocObj, args.xml):
-                print('Saving results to {} xml file failed.'.format(args.xml))
+                printError('Saving results to {} xml file failed.'.format(args.xml))
             
         if args.txt:
             fileExporter = FileExporter()
+            if args.verbose:
+                printInfo('Saving results to {} txt file.'.format(args.txt))
             if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
-                print('Saving results to {} txt file failed.'.format(args.txt))
+                printError('Saving results to {} txt file failed.'.format(args.txt))
             
-        print('IPGeoLocation {} - Results'.format(VERSION))
-        printIPGeoLocation(IpGeoLocObj)
-    
