@@ -30,9 +30,9 @@ from utilities.FileExporter import FileExporter
 import webbrowser
 from urllib.parse import urlparse
 import os.path
+from libraries.colorama import Fore, Style
 
-
-VERSION = '1.6'
+VERSION = '1.7'
 
 
 def checkProxy(url):
@@ -64,10 +64,11 @@ def checkFileWrite(filename):
     
     
 def printInfo( message, newLine=False):
-    if newLine:
-        print('{}\n'.format(message))
-    else:
-        print('{}'.format(message))
+    if args.verbose:
+        if newLine:
+            print('{}\n'.format(message))
+        else:
+            print('{}'.format(message))
         
         
 def printError( message):
@@ -177,7 +178,6 @@ Retrieve IP Geolocation information from http://ip-api.com
         printError("You haven't provided a User-Agent strings file, each string in a new line.")
         sys.exit(3)
     
-    
     ipGeoLocRequest = IpGeoLocationLib()
     result = ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, args.r, args.ulist, args.proxy, args.no_print, args.verbose)
 
@@ -203,15 +203,13 @@ Retrieve IP Geolocation information from http://ip-api.com
             
         if args.xml:
             fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} xml file.'.format(args.xml))
+            printInfo('Saving results to {} xml file.'.format(args.xml))
             if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
                 printError('Saving results to {} xml file failed.'.format(args.xml))
             
         if args.txt:
             fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} txt file.'.format(args.txt))
+            printInfo('Saving results to {} txt file.'.format(args.txt))
             if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
                 printError('Saving results to {} txt file failed.'.format(args.txt))
         
@@ -219,28 +217,24 @@ Retrieve IP Geolocation information from http://ip-api.com
     elif IpGeoLocObj is not None:
         if args.g:
             if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
-                if args.verbose:
-                    printInfo('Opening Geolocation in browser..'.format(args.csv))
+                printInfo('Opening Geolocation in browser..'.format(args.csv))
                 webbrowser.open(IpGeoLocObj.GoogleMapsLink)
 
         if args.csv:
             fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} csv file.'.format(args.csv))
+            printInfo('Saving results to {} csv file.'.format(args.csv))
             if not fileExporter.ExportToCSV(IpGeoLocObj, args.csv):
                 printError('Saving results to {} csv file failed.'.format(args.csv))
             
         if args.xml:
             fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} xml file.'.format(args.xml))
+            printInfo('Saving results to {} xml file.'.format(args.xml))
             if not fileExporter.ExportToXML(IpGeoLocObj, args.xml):
                 printError('Saving results to {} xml file failed.'.format(args.xml))
             
         if args.txt:
             fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} txt file.'.format(args.txt))
+            printInfo('Saving results to {} txt file.'.format(args.txt))
             if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
                 printError('Saving results to {} txt file failed.'.format(args.txt))
             

@@ -58,8 +58,7 @@ class IpGeoLocationLib:
             
             if userAgentFile and os.path.isfile(userAgentFile) and os.access(userAgentFile, os.R_OK):
                 self.UserAgentFile = userAgentFile
-                if self.Verbose:
-                    self.__print('Loading User-Agent strings from file..')
+                self.__print('Loading User-Agent strings from file..')
                 self.__loadUserAgents()
             
             if targetsFile and os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
@@ -69,22 +68,15 @@ class IpGeoLocationLib:
                 self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
                 opener = request.build_opener(self.Proxy)
                 request.install_opener(opener)
-                if self.Verbose:
-                    self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
+                self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
             
             
             if self.TargetsFile:
-                results = self.__retrieveGeolocations()
-                
-                return results
+                return self.__retrieveGeolocations()
             
             else:
-                if self.Verbose:
-                    self.__print('Retrieving target Geolocation..')
-                    
-                result = self.__retrieveGeolocation(target)
-                
-                return result
+                self.__print('Retrieving target Geolocation..')
+                return self.__retrieveGeolocation(target)
                 
             
         except MyExceptions.UserAgentFileEmptyError:
@@ -107,13 +99,11 @@ class IpGeoLocationLib:
         """Retrieve IP Geolocation for each target in the list"""
         IpGeoLocObjs = []
  
-        if self.Verbose:
-            self.__print('Loading targets from file..')
+        self.__print('Loading targets from file..')
             
         self.__loadTargets()
                     
-        if self.Verbose:
-            self.__print('Retrieving targets Geolocations..')
+        self.__print('Retrieving targets Geolocations..')
                     
         for target in self.Targets:
             IpGeoLocObjs.append(self.__retrieveGeolocation(target))
@@ -141,12 +131,11 @@ class IpGeoLocationLib:
             query = target
             target = ip
         
+        
         if self.RandomUA and self.UserAgentFile:
             self.__pickRandomUserAgent()
         
-        if self.Verbose:
-            self.__print('User-Agent string used: {}.'.format(self.UserAgent))
-                
+        
         req = request.Request(self.URL.format(target), data=None, headers={
           'User-Agent':self.UserAgent
         })
@@ -154,9 +143,9 @@ class IpGeoLocationLib:
         response = request.urlopen(req)
         
         if response.code == 200:
+            self.__print('User-Agent used: {}'.format(self.UserAgent))
             encoding = response.headers.get_content_charset()
-            if self.Verbose:
-                self.__print('Geolocation information has been retrieved.')
+            self.__print('Geolocation information has been retrieved:')
                 
             ipGeoLocObj = IpGeoLocation(query, json.loads(response.read().decode(encoding)))
         
@@ -174,8 +163,7 @@ class IpGeoLocationLib:
             raise MyExceptions.UserAgentFileNotSpecifiedError()
         
         self.UserAgents = [line.strip() for line in open(self.UserAgentFile, 'r') if line.strip()]
-        if self.Verbose:
-            self.__print('User-Agent strings loaded.')
+        self.__print('User-Agent strings loaded.')
                 
         if len(self.UserAgents) == 0:
             raise MyExceptions.UserAgentFileEmptyError()
@@ -187,8 +175,7 @@ class IpGeoLocationLib:
             raise MyExceptions.TargetsFileNotSpecifiedError()
         
         self.Targets = [line.strip() for line in open(self.TargetsFile, 'r') if line.strip()]
-        if self.Verbose:
-            self.__print('Targets loaded.')
+        self.__print('Targets loaded.')
             
         if len(self.Targets) == 0:
             raise MyExceptions.TargetsFileEmptyError()
@@ -220,10 +207,11 @@ class IpGeoLocationLib:
         
     
     def __print(self, message, newLine=False):
-        if newLine:
-            print('{}\n'.format(message))
-        else:
-            print('{}'.format(message))
+        if self.Verbose:
+            if newLine:
+                print('{}\n'.format(message))
+            else:
+                print('{}'.format(message))
         
         
     def __printError(self, message):
