@@ -74,11 +74,9 @@ class IpGeoLocationLib:
             
             
             if self.TargetsFile:
-                self.__print('Retrieving targets Geolocation..')
                 return self.__retrieveGeolocations()
             
             else:
-                self.__print('Retrieving target Geolocation..')
                 return self.__retrieveGeolocation(target)
                 
             
@@ -134,6 +132,8 @@ class IpGeoLocationLib:
         if self.RandomUA and self.UserAgentFile:
             self.__pickRandomUserAgent()
         
+        
+        self.__print('Retrieving {} Geolocation..'.format(target))
         
         req = request.Request(self.RequestURL.format(target), data=None, headers={
           'User-Agent':self.UserAgent
