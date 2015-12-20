@@ -197,44 +197,53 @@ Retrieve IP Geolocation information from http://ip-api.com
     
     if args.csv:
         fileExporter = FileExporter()
-        printInfo('Saving results to {} csv file.'.format(args.csv))
-            
+        printInfo('Saving results to {} CSV file.'.format(args.csv))
+        success = False
+        
         if IpGeoLocObjs:
-            if not fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv):
-                printError('Saving results to {} csv file failed.'.format(args.csv))
+            success = fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv)
         elif IpGeoLocObj:
-            if not fileExporter.ExportToCSV(IpGeoLocObj, args.csv):
-                printError('Saving results to {} csv file failed.'.format(args.csv))
+            success = fileExporter.ExportToCSV(IpGeoLocObj, args.csv)
+        
+        if not success:
+            printError('Saving results to {} CSV file failed.'.format(args.csv))
+    
     
     if args.xml:
         fileExporter = FileExporter()
-        printInfo('Saving results to {} xml file.'.format(args.xml))
+        printInfo('Saving results to {} XML file.'.format(args.xml))
+        success = False
         
         if IpGeoLocObjs:
-            if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
-                printError('Saving results to {} xml file failed.'.format(args.xml))
+            success = fileExporter.ExportListToXML(IpGeoLocObjs, args.xml)
         elif IpGeoLocObj:
-            if not fileExporter.ExportToXML(IpGeoLocObj, args.xml):
-                printError('Saving results to {} xml file failed.'.format(args.xml))
+            success = fileExporter.ExportToXML(IpGeoLocObj, args.xml)
+        
+        if not success:
+            printError('Saving results to {} XML file failed.'.format(args.xml))
             
             
     if args.txt:
         fileExporter = FileExporter()
-        printInfo('Saving results to {} txt file.'.format(args.txt))
+        printInfo('Saving results to {} text file.'.format(args.txt))
+        success = False
         
         if IpGeoLocObjs:
-            if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
-                printError('Saving results to {} txt file failed.'.format(args.txt))
+            success = fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt)
         elif IpGeoLocObj:
-            if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
-                printError('Saving results to {} txt file failed.'.format(args.txt))
+            success = fileExporter.ExportToTXT(IpGeoLocObj, args.txt)
+            
+        if not success:
+            printError('Saving results to {} text file failed.'.format(args.txt))
                 
     
     if args.g:
         if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
+            
             if 'CYGWIN_NT' in platform.system():
                 printInfo('Opening Geolocation in browser..'.format(args.csv))
                 call(['cygstart', IpGeoLocObj.GoogleMapsLink])
+                
             elif platform.system() == 'Windows' or platform.system() == 'Linux':
                 printInfo('Opening Geolocation in browser..'.format(args.csv))
                 webbrowser.open(IpGeoLocObj.GoogleMapsLink)
