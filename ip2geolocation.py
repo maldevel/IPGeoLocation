@@ -22,7 +22,7 @@
 
 __author__ = 'maldevel'
 
-import argparse, sys, platform, webbrowser, os.path
+import argparse, sys, webbrowser, os.path
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
 from geolocation.IpGeoLocation import IpGeoLocation
@@ -30,8 +30,9 @@ from utilities.FileExporter import FileExporter
 from urllib.parse import urlparse
 from libraries.colorama import Fore, Style
 from subprocess import call
+from sys import platform as _platform
 
-VERSION = '1.7'
+__version__ = '1.7'
 
 
 def checkProxyUrl(url):
@@ -64,14 +65,14 @@ def checkFileWrite(filename):
     
 def printInfo( message):
     if args.verbose:
-        if platform.system() == 'Windows':
+        if _platform == 'win32':
             print('[*] {}'.format(message))
         else:
             print('[' + Fore.GREEN + '*' + Style.RESET_ALL + '] {}'.format(message))
 
 
 def printError(message):
-    if platform.system() == 'Windows':
+    if _platform == 'win32':
         print('[ERROR] {}'.format(message))
     else:
         print('[' + Fore.RED + 'ERROR' + Style.RESET_ALL + '] {}'.format(message))
@@ -79,10 +80,10 @@ def printError(message):
 
     
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(description="""IPGeoLocation {} 
 Retrieve IP Geolocation information from http://ip-api.com
-    """.format(VERSION), formatter_class=RawTextHelpFormatter)
+    """.format(__version__), formatter_class=RawTextHelpFormatter)
     
     
     #pick target/s
@@ -104,8 +105,8 @@ Retrieve IP Geolocation information from http://ip-api.com
     parser.add_argument('-u', '--user-agent', 
                         metavar='User-Agent', 
                         dest='uagent',
-                        default='IP2GeoLocation {}'.format(VERSION), 
-                        help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(VERSION))
+                        default='IP2GeoLocation {}'.format(__version__), 
+                        help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(__version__))
     
     parser.add_argument('-r', 
                         action='store_true',
@@ -240,11 +241,11 @@ Retrieve IP Geolocation information from http://ip-api.com
     if args.g:
         if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
             
-            if 'CYGWIN_NT' in platform.system():
+            if _platform == 'cygwin':
                 printInfo('Opening Geolocation in browser..'.format(args.csv))
                 call(['cygstart', IpGeoLocObj.GoogleMapsLink])
                 
-            elif platform.system() == 'Windows' or platform.system() == 'Linux':
+            elif _platform == 'win32' or _platform == 'linux' or _platform == 'linux2':
                 printInfo('Opening Geolocation in browser..'.format(args.csv))
                 webbrowser.open(IpGeoLocObj.GoogleMapsLink)
             
