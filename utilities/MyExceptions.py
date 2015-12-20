@@ -37,3 +37,6 @@ class TargetsFileNotSpecifiedError(Exception):
 
 class UserAgentFileNotSpecifiedError(Exception):
     pass
+
+class ProxyServerNotReachableError(Exception):
+    pass

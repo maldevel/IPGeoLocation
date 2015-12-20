@@ -22,12 +22,9 @@
 
 __author__ = 'maldevel'
 
-import json, ipaddress 
+import json, ipaddress, socket, os.path, random, platform
 from urllib import request
 from geolocation.IpGeoLocation import IpGeoLocation
-import socket
-import os.path
-import random
 from time import sleep
 from utilities import MyExceptions 
 from libraries.colorama import Fore, Style
@@ -36,7 +33,9 @@ class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
     
     def __init__(self):
-        self.URL = 'http://ip-api.com/json/{}'
+        self.URL = 'http://ip-api.com'
+        self.RequestURL = self.URL + '/json/{}'
+        self.BOLD = '\033[1m'
         self.Proxy = request.ProxyHandler({})
         self.RandomUA = False
         self.UserAgentFile = None
@@ -67,6 +66,7 @@ class IpGeoLocationLib:
                 self.__loadTargets()
 
             if proxy:
+                self.__checkProxy(proxy.netloc)
                 self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
                 opener = request.build_opener(self.Proxy)
                 request.install_opener(opener)
@@ -92,6 +92,8 @@ class IpGeoLocationLib:
             self.__printError('User-Agent strings file has not been provided!.')
         except MyExceptions.TargetsFileNotSpecifiedError:
             self.__printError('Targets file has not been provided!.')
+        except MyExceptions.ProxyServerNotReachableError:
+            self.__printError('Proxy server not reachable')
         except:
             self.__printError("An unexpected error occurred")
         
@@ -133,7 +135,7 @@ class IpGeoLocationLib:
             self.__pickRandomUserAgent()
         
         
-        req = request.Request(self.URL.format(target), data=None, headers={
+        req = request.Request(self.RequestURL.format(target), data=None, headers={
           'User-Agent':self.UserAgent
         })
         
@@ -142,7 +144,7 @@ class IpGeoLocationLib:
         if response.code == 200:
             self.__print('User-Agent used: {}'.format(self.UserAgent))
             encoding = response.headers.get_content_charset()
-            self.__print('Geolocation information has been retrieved:')
+            self.__print('Geolocation information has been retrieved')
                 
             ipGeoLocObj = IpGeoLocation(query, json.loads(response.read().decode(encoding)))
         
@@ -203,51 +205,60 @@ class IpGeoLocationLib:
             return False
         
     
-    def __print(self, message, newLine=False):
+    def __print(self, message):
         if self.Verbose:
-            if newLine:
-                print('{}\n'.format(message))
+            if platform.system() == 'Windows':
+                print('[*] {}'.format(message))
             else:
-                print('{}'.format(message))
-        
-        
+                print('[' + Fore.GREEN + '*' + Style.RESET_ALL + '] {}'.format(message))
+
+    def __printResult(self, title, value):
+            if platform.system() == 'Windows':
+                print('{}: {}'.format(title, value))
+            else:
+                print(title + ': ' + self.BOLD + Fore.GREEN + value + Style.RESET_ALL)
+
     def __printError(self, message):
-        print('Error: {}\n'.format(message))
+        if platform.system() == 'Windows':
+            print('[ERROR] {}'.format(message))
+        else:
+            print('[' + Fore.RED + 'ERROR' + Style.RESET_ALL + '] {}'.format(message))
         
         
     def __printIPGeoLocation(self, ipGeoLocation):
-        print("""
-        Target: {}
+        self.__printResult('\nTarget', ipGeoLocation.Query)
+        self.__printResult('IP', ipGeoLocation.IP)
+        self.__printResult('ASN', ipGeoLocation.ASN)
+        self.__printResult('City', ipGeoLocation.City)
+        self.__printResult('Country', ipGeoLocation.Country)
+        self.__printResult('Country Code', ipGeoLocation.CountryCode)
+        self.__printResult('ISP', ipGeoLocation.ISP)
+        self.__printResult('Latitude', str(ipGeoLocation.Latitude))
+        self.__printResult('Longtitude', str(ipGeoLocation.Longtitude))
+        self.__printResult('Organization', ipGeoLocation.Organization)
+        self.__printResult('Region Code', ipGeoLocation.Region)
+        self.__printResult('Region Name', ipGeoLocation.RegionName)
+        self.__printResult('Timezone', ipGeoLocation.Timezone)
+        self.__printResult('Zip Code', ipGeoLocation.Zip)
+        self.__printResult('Google Maps', ipGeoLocation.GoogleMapsLink)
+        print()
+        #.encode('cp737', errors='replace').decode('cp737')
+
+
+    def __checkProxy(self, proxy):
+        check = True
+        self.__print('Testing proxy {} connectivity..'.format(proxy))
+
+        try:
+            req = request.Request(self.URL)
+            req.set_proxy(proxy, 'http')
+            request.urlopen(req)
+        except:
+            check = False
         
-        IP: {}
-        ASN: {}
-        City: {}
-        Country: {}
-        Country Code: {}
-        ISP: {}
-        Latitude: {}
-        Longtitude: {}
-        Organization: {}
-        Region Code: {}
-        Region Name: {}
-        Timezone: {}
-        Zip Code: {}
-        Google Maps: {}
-                """.format(ipGeoLocation.Query,
-                       ipGeoLocation.IP,
-                       ipGeoLocation.ASN,
-                       ipGeoLocation.City, 
-                       ipGeoLocation.Country,
-                       ipGeoLocation.CountryCode,
-                       ipGeoLocation.ISP,
-                       ipGeoLocation.Latitude,
-                       ipGeoLocation.Longtitude,
-                       ipGeoLocation.Organization,
-                       ipGeoLocation.Region,
-                       ipGeoLocation.RegionName,
-                       ipGeoLocation.Timezone,
-                       ipGeoLocation.Zip,
-                       ipGeoLocation.GoogleMapsLink
-                   )#.encode('cp737', errors='replace').decode('cp737')
-           )
+        if check == True:
+            self.__print('Proxy server is reachable.')
+        else:
+            raise MyExceptions.ProxyServerNotReachableError()
+            
     

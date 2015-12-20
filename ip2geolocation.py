@@ -22,35 +22,34 @@
 
 __author__ = 'maldevel'
 
-import argparse, sys
+import argparse, sys, platform, webbrowser, os.path
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
 from geolocation.IpGeoLocation import IpGeoLocation
 from utilities.FileExporter import FileExporter
-import webbrowser
 from urllib.parse import urlparse
-import os.path
 from libraries.colorama import Fore, Style
+from subprocess import call
 
 VERSION = '1.7'
 
 
-def checkProxy(url):
+def checkProxyUrl(url):
         """Check if proxy url is valid"""
         url_checked = urlparse(url)
         if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
             raise argparse.ArgumentTypeError('Invalid {} Proxy URL (example: https://127.0.0.1:8080).'.format(url))
         return url_checked
     
-    
+
 def checkFileRead(filename):
     """Check if file exists and we have access to read it"""
     if os.path.isfile(filename) and os.access(filename, os.R_OK):
         return filename
     else:
         raise argparse.ArgumentTypeError("Invalid {} file (File does not exist, insufficient permissions or it's not a file).".format(filename))
-    
-    
+
+
 def checkFileWrite(filename):
     """Check if we can write to file"""
     if os.path.isfile(filename):
@@ -63,17 +62,21 @@ def checkFileWrite(filename):
         raise argparse.ArgumentTypeError("Unable to write to {} file (Insufficient permissions).".format(filename))
     
     
-def printInfo( message, newLine=False):
+def printInfo( message):
     if args.verbose:
-        if newLine:
-            print('{}\n'.format(message))
+        if platform.system() == 'Windows':
+            print('[*] {}'.format(message))
         else:
-            print('{}'.format(message))
-        
-        
-def printError( message):
-    print('Error: {}\n'.format(message))
+            print('[' + Fore.GREEN + '*' + Style.RESET_ALL + '] {}'.format(message))
+
+
+def printError(message):
+    if platform.system() == 'Windows':
+        print('[ERROR] {}'.format(message))
+    else:
+        print('[' + Fore.RED + 'ERROR' + Style.RESET_ALL + '] {}'.format(message))
     
+
     
 if __name__ == '__main__':
     
@@ -130,7 +133,7 @@ Retrieve IP Geolocation information from http://ip-api.com
     
     #anonymity options
     parser.add_argument('-x', '--proxy', 
-                        type=checkProxy, 
+                        type=checkProxyUrl, 
                         help='Setup proxy server (example: http://127.0.0.1:8080)')
     
     
@@ -173,7 +176,6 @@ Retrieve IP Geolocation information from http://ip-api.com
         printError("Google maps location is working only with single targets.")
         sys.exit(2)
         
-        
     if(args.r and not args.ulist):
         printError("You haven't provided a User-Agent strings file, each string in a new line.")
         sys.exit(3)
@@ -193,48 +195,47 @@ Retrieve IP Geolocation information from http://ip-api.com
         sys.exit(5)
         
     
-    if IpGeoLocObjs is not None:
-        if args.csv:
-            fileExporter = FileExporter()
-            if args.verbose:
-                printInfo('Saving results to {} csv file.'.format(args.csv))
+    if args.csv:
+        fileExporter = FileExporter()
+        printInfo('Saving results to {} csv file.'.format(args.csv))
+            
+        if IpGeoLocObjs:
             if not fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv):
                 printError('Saving results to {} csv file failed.'.format(args.csv))
-            
-        if args.xml:
-            fileExporter = FileExporter()
-            printInfo('Saving results to {} xml file.'.format(args.xml))
-            if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
-                printError('Saving results to {} xml file failed.'.format(args.xml))
-            
-        if args.txt:
-            fileExporter = FileExporter()
-            printInfo('Saving results to {} txt file.'.format(args.txt))
-            if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
-                printError('Saving results to {} txt file failed.'.format(args.txt))
-        
-                
-    elif IpGeoLocObj is not None:
-        if args.g:
-            if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
-                printInfo('Opening Geolocation in browser..'.format(args.csv))
-                webbrowser.open(IpGeoLocObj.GoogleMapsLink)
-
-        if args.csv:
-            fileExporter = FileExporter()
-            printInfo('Saving results to {} csv file.'.format(args.csv))
+        elif IpGeoLocObj:
             if not fileExporter.ExportToCSV(IpGeoLocObj, args.csv):
                 printError('Saving results to {} csv file failed.'.format(args.csv))
-            
-        if args.xml:
-            fileExporter = FileExporter()
-            printInfo('Saving results to {} xml file.'.format(args.xml))
+    
+    if args.xml:
+        fileExporter = FileExporter()
+        printInfo('Saving results to {} xml file.'.format(args.xml))
+        
+        if IpGeoLocObjs:
+            if not fileExporter.ExportListToXML(IpGeoLocObjs, args.xml):
+                printError('Saving results to {} xml file failed.'.format(args.xml))
+        elif IpGeoLocObj:
             if not fileExporter.ExportToXML(IpGeoLocObj, args.xml):
                 printError('Saving results to {} xml file failed.'.format(args.xml))
             
-        if args.txt:
-            fileExporter = FileExporter()
-            printInfo('Saving results to {} txt file.'.format(args.txt))
+            
+    if args.txt:
+        fileExporter = FileExporter()
+        printInfo('Saving results to {} txt file.'.format(args.txt))
+        
+        if IpGeoLocObjs:
+            if not fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt):
+                printError('Saving results to {} txt file failed.'.format(args.txt))
+        elif IpGeoLocObj:
             if not fileExporter.ExportToTXT(IpGeoLocObj, args.txt):
                 printError('Saving results to {} txt file failed.'.format(args.txt))
+                
+    
+    if args.g:
+        if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
+            if 'CYGWIN_NT' in platform.system():
+                printInfo('Opening Geolocation in browser..'.format(args.csv))
+                call(['cygstart', IpGeoLocObj.GoogleMapsLink])
+            elif platform.system() == 'Windows' or platform.system() == 'Linux':
+                printInfo('Opening Geolocation in browser..'.format(args.csv))
+                webbrowser.open(IpGeoLocObj.GoogleMapsLink)
             
