@@ -30,7 +30,7 @@ import os.path
 import random
 from time import sleep
 from utilities import MyExceptions 
-
+from libraries.colorama import Fore, Style
 
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
@@ -63,6 +63,8 @@ class IpGeoLocationLib:
             
             if targetsFile and os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
                 self.TargetsFile = targetsFile
+                self.__print('Loading targets from file..')
+                self.__loadTargets()
 
             if proxy:
                 self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
@@ -72,6 +74,7 @@ class IpGeoLocationLib:
             
             
             if self.TargetsFile:
+                self.__print('Retrieving targets Geolocation..')
                 return self.__retrieveGeolocations()
             
             else:
@@ -98,12 +101,6 @@ class IpGeoLocationLib:
     def __retrieveGeolocations (self):
         """Retrieve IP Geolocation for each target in the list"""
         IpGeoLocObjs = []
- 
-        self.__print('Loading targets from file..')
-            
-        self.__loadTargets()
-                    
-        self.__print('Retrieving targets Geolocations..')
                     
         for target in self.Targets:
             IpGeoLocObjs.append(self.__retrieveGeolocation(target))
