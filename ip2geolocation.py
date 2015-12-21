@@ -241,11 +241,13 @@ Retrieve IP Geolocation information from http://ip-api.com
     if args.g:
         if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
             
+            printInfo('Opening Geolocation in browser..'.format(args.csv))
+            
             if _platform == 'cygwin':
-                printInfo('Opening Geolocation in browser..'.format(args.csv))
                 call(['cygstart', IpGeoLocObj.GoogleMapsLink])
                 
             elif _platform == 'win32' or _platform == 'linux' or _platform == 'linux2':
-                printInfo('Opening Geolocation in browser..'.format(args.csv))
                 webbrowser.open(IpGeoLocObj.GoogleMapsLink)
             
+            else:
+                printError('-g option is not available on your platform.')
