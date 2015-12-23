@@ -213,7 +213,7 @@ class IpGeoLocationLib:
     
     def __print(self, message):
         if not self.NoLog:
-            Logger.WriteLog(message)
+            Logger.WriteLog('INFO', message)
             
         if self.Verbose:
             if platform.system() == 'Windows':
@@ -229,7 +229,7 @@ class IpGeoLocationLib:
 
     def __printError(self, message):
         if not self.NoLog:
-            Logger.WriteLog(message)
+            Logger.WriteLog('ERROR', message)
             
         if platform.system() == 'Windows':
             print('[ERROR] {}'.format(message))

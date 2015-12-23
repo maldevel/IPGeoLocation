@@ -65,7 +65,7 @@ def checkFileWrite(filename):
     
 def printInfo( message):
     if not args.nolog:
-        Logger.WriteLog(message)
+        Logger.WriteLog('INFO', message)
             
     if args.verbose:
         if _platform == 'win32':
@@ -76,7 +76,7 @@ def printInfo( message):
 
 def printError(message):
     if not args.nolog:
-        Logger.WriteLog(message)
+        Logger.WriteLog('ERROR', message)
             
     if _platform == 'win32':
         print('[ERROR] {}'.format(message))
