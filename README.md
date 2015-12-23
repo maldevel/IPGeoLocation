@@ -115,3 +115,6 @@ optional arguments:
 
 **Retrieve IP Geolocation for many targets and export results to xml**
 * ./ip2geolocation.py -T /path/to/targets/targets.txt --xml /path/to/results.xml
+
+**Do not print results to terminal**
+* ./ip2geolocation.py -m -e /path/to/results.txt --noprint 
