@@ -21,18 +21,18 @@
 """
 
 __author__ = 'maldevel'
+__version__ = '1.8'
 
 import argparse, sys, webbrowser, os.path
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
 from geolocation.IpGeoLocation import IpGeoLocation
 from utilities.FileExporter import FileExporter
+from utilities.Logger import Logger
 from urllib.parse import urlparse
 from libraries.colorama import Fore, Style
 from subprocess import call
 from sys import platform as _platform
-
-__version__ = '1.7'
 
 
 def checkProxyUrl(url):
@@ -64,6 +64,9 @@ def checkFileWrite(filename):
     
     
 def printInfo( message):
+    if not args.nolog:
+        Logger.WriteLog(message)
+            
     if args.verbose:
         if _platform == 'win32':
             print('[*] {}'.format(message))
@@ -72,6 +75,9 @@ def printInfo( message):
 
 
 def printError(message):
+    if not args.nolog:
+        Logger.WriteLog(message)
+            
     if _platform == 'win32':
         print('[ERROR] {}'.format(message))
     else:
@@ -83,6 +89,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""IPGeoLocation {} 
 Retrieve IP Geolocation information from http://ip-api.com
+http://ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
     """.format(__version__), formatter_class=RawTextHelpFormatter)
     
     
@@ -123,13 +130,17 @@ Retrieve IP Geolocation information from http://ip-api.com
                         action='store_true', 
                         help='Open IP location in Google maps with default browser.')
     
-    parser.add_argument('--no-print', 
+    parser.add_argument('--noprint', 
                         action='store_true', 
-                        help='Do not print results to terminal.')
+                        help='IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation not to print results to terminal with this option.')
     
     parser.add_argument('-v', '--verbose', 
                         action='store_true', 
-                        help='Enable verbose printing.')
+                        help='Enable verbose output.')
+    
+    parser.add_argument('--nolog', 
+                        action='store_true', 
+                        help='IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log files with this option.')
     
     
     #anonymity options
@@ -182,7 +193,9 @@ Retrieve IP Geolocation information from http://ip-api.com
         sys.exit(3)
     
     ipGeoLocRequest = IpGeoLocationLib()
-    result = ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, args.r, args.ulist, args.proxy, args.no_print, args.verbose)
+    result = ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, 
+                                     args.r, args.ulist, args.proxy, 
+                                     args.noprint, args.verbose, args.nolog)
 
     IpGeoLocObj = None
     IpGeoLocObjs = None

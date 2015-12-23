@@ -21,6 +21,7 @@ Python 3.x
 * Open IP geolocation in Google Maps using the default browser.
 * Export results to csv, xml and txt format.
 
+
 **Geolocation Information**
 ---
 * ASN
@@ -40,13 +41,14 @@ Python 3.x
 **Usage**
 ---
 ```
-$ ./ip2geolocation.py -h 
+$ ./ip2geolocation.py
 usage: ip2geolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent] [-r]
-                         [-U file] [-g] [--no-print] [-v] [-x PROXY] [-e file]
-                         [-ec file] [-ex file]
+                         [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
+                         [-e file] [-ec file] [-ex file]
 
-IPGeoLocation 1.6
+IPGeoLocation 1.8
 Retrieve IP Geolocation information from http://ip-api.com
+http://ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
 
 
 optional arguments:
@@ -57,13 +59,16 @@ optional arguments:
   -T file, --tlist file
                         A list of IPs/Domains targets, each target in new line.
   -u User-Agent, --user-agent User-Agent
-                        Set the User-Agent request header (default: IP2GeoLocation 1.6).
+                        Set the User-Agent request header (default: IP2GeoLocation 1.8).
   -r                    Pick User-Agent strings randomly from a file.
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
   -g                    Open IP location in Google maps with default browser.
-  --no-print            Do not print results to terminal.
-  -v, --verbose         Enable verbose printing.
+  --noprint             IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation n
+ot to print results to terminal with this option.
+  -v, --verbose         Enable verbose output.
+  --nolog               IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log
+files with this option.
   -x PROXY, --proxy PROXY
                         Setup proxy server (example: http://127.0.0.1:8080)
   -e file, --txt file   Export results.
@@ -82,6 +87,9 @@ optional arguments:
 
 **Retrieve Domain Geolocation**
 * ./ip2geolocation.py -t example.com
+
+**Do not save .log files**
+* ./ip2geolocation.py -t example.com --nolog
 
 **Custom User Agent string** 
 * ./ip2geolocation.py -t x.x.x.x -u "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko"

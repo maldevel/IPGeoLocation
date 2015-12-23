@@ -25,12 +25,14 @@ __author__ = 'maldevel'
 import json, ipaddress, socket, os.path, random, platform
 from urllib import request
 from geolocation.IpGeoLocation import IpGeoLocation
+from utilities.Logger import Logger
 from time import sleep
 from utilities import MyExceptions 
 from libraries.colorama import Fore, Style
 
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
+    
     
     def __init__(self):
         self.URL = 'http://ip-api.com'
@@ -44,25 +46,31 @@ class IpGeoLocationLib:
         self.Targets = None
         self.Verbose = False
         self.NoPrint = False
+        self.NoLog = False 
         
-    def GetInfo(self, target, userAgent, targetsFile=None, rUserAgent=False, userAgentFile=None, proxy=False, noprint=False, verbose=False):
+        
+    def GetInfo(self, target, userAgent, targetsFile=None, 
+                rUserAgent=False, userAgentFile=None, 
+                proxy=False, noprint=False, verbose=False, 
+                nolog=False):
         """Retrieve information"""
         
         self.UserAgent = userAgent
         self.RandomUA = rUserAgent
         self.Verbose = verbose
         self.NoPrint = noprint
+        self.NoLog = nolog
         
         try:
             
             if userAgentFile and os.path.isfile(userAgentFile) and os.access(userAgentFile, os.R_OK):
                 self.UserAgentFile = userAgentFile
-                self.__print('Loading User-Agent strings from file..')
+                self.__print('Loading User-Agent strings from file {}..'.format(self.UserAgentFile))
                 self.__loadUserAgents()
             
             if targetsFile and os.path.isfile(targetsFile) and os.access(targetsFile, os.R_OK):
                 self.TargetsFile = targetsFile
-                self.__print('Loading targets from file..')
+                self.__print('Loading targets from file {}..'.format(self.TargetsFile))
                 self.__loadTargets()
 
             if proxy:
@@ -72,13 +80,11 @@ class IpGeoLocationLib:
                 request.install_opener(opener)
                 self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
             
-            
             if self.TargetsFile:
                 return self.__retrieveGeolocations()
             
             else:
                 return self.__retrieveGeolocation(target)
-                
             
         except MyExceptions.UserAgentFileEmptyError:
             self.__printError("User-Agent strings file is empty!")
@@ -133,7 +139,7 @@ class IpGeoLocationLib:
             self.__pickRandomUserAgent()
         
         
-        self.__print('Retrieving {} Geolocation..'.format(target))
+        self.__print('Retrieving {} Geolocation..'.format(query))
         
         req = request.Request(self.RequestURL.format(target), data=None, headers={
           'User-Agent':self.UserAgent
@@ -144,10 +150,10 @@ class IpGeoLocationLib:
         if response.code == 200:
             self.__print('User-Agent used: {}'.format(self.UserAgent))
             encoding = response.headers.get_content_charset()
-            self.__print('Geolocation information has been retrieved')
-                
             ipGeoLocObj = IpGeoLocation(query, json.loads(response.read().decode(encoding)))
-        
+            
+            self.__print('Geolocation information has been retrieved for {}({}).'.format(query, ipGeoLocObj.IP))
+            
             if not self.NoPrint:
                 self.__printIPGeoLocation(ipGeoLocObj)
                 
@@ -206,6 +212,9 @@ class IpGeoLocationLib:
         
     
     def __print(self, message):
+        if not self.NoLog:
+            Logger.WriteLog(message)
+            
         if self.Verbose:
             if platform.system() == 'Windows':
                 print('[*] {}'.format(message))
@@ -219,6 +228,9 @@ class IpGeoLocationLib:
                 print(title + ': ' + self.BOLD + Fore.GREEN + value + Style.RESET_ALL)
 
     def __printError(self, message):
+        if not self.NoLog:
+            Logger.WriteLog(message)
+            
         if platform.system() == 'Windows':
             print('[ERROR] {}'.format(message))
         else:
