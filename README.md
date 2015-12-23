@@ -64,11 +64,9 @@ optional arguments:
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
   -g                    Open IP location in Google maps with default browser.
-  --noprint             IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation n
-ot to print results to terminal with this option.
+  --noprint             Run without printing results to terminal.
   -v, --verbose         Enable verbose output.
-  --nolog               IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log
-files with this option.
+  --nolog               Run without logging.
   -x PROXY, --proxy PROXY
                         Setup proxy server (example: http://127.0.0.1:8080)
   -e file, --txt file   Export results.
