@@ -27,8 +27,8 @@ from time import gmtime, strftime
 class Logger:
     
     @staticmethod
-    def WriteLog(type, message):
+    def WriteLog(messagetype, message):
         filename = '{}.log'.format(strftime("%Y%m%d", gmtime()))
         with open(filename, 'a') as logFile:
-            logFile.write('[{}] {} - {}\n'.format(type, strftime("%Y-%m-%d %H:%M:%S", gmtime()), message))
+            logFile.write('[{}] {} - {}\n'.format(messagetype, strftime("%Y-%m-%d %H:%M:%S", gmtime()), message))
             
