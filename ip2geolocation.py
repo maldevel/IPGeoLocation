@@ -21,17 +21,14 @@
 """
 
 __author__ = 'maldevel'
-__version__ = '1.8'
+__version__ = '1.9'
 
-import argparse, sys, webbrowser, os.path
+import argparse, sys, os.path
 from argparse import RawTextHelpFormatter
 from geolocation.IpGeoLocationLib import IpGeoLocationLib
-from geolocation.IpGeoLocation import IpGeoLocation
-from utilities.FileExporter import FileExporter
 from utilities.Logger import Logger
 from urllib.parse import urlparse
 from libraries.colorama import Fore, Style
-from subprocess import call
 from sys import platform as _platform
 
 
@@ -61,20 +58,10 @@ def checkFileWrite(filename):
         return filename
     else:
         raise argparse.ArgumentTypeError("Unable to write to {} file (Insufficient permissions).".format(filename))
-    
-    
-def printInfo( message):
-    if not args.nolog:
-        Logger.WriteLog('INFO', message)
-            
-    if args.verbose:
-        if _platform == 'win32':
-            print('[*] {}'.format(message))
-        else:
-            print('[' + Fore.GREEN + '*' + Style.RESET_ALL + '] {}'.format(message))
 
 
 def printError(message):
+    """Print/Log error message"""
     if not args.nolog:
         Logger.WriteLog('ERROR', message)
             
@@ -168,99 +155,43 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
     
     args = parser.parse_args()
     
+    # no args provided
     if len(sys.argv) == 1:
         parser.print_help()
-        sys.exit(0)
+        sys.exit(1)
       
+    #single target or multiple targets 
     if(args.target and args.tlist):
         printError("You can request Geolocation information either for a single target(-t) or a list of targets(-T). Not both!")
-        sys.exit(1)
-        
-    if(args.target and args.myip):
-        printError("You can request Geolocation information either for a single target(-t) or your own IP address. Not both!")
-        sys.exit(1)
-        
-    if(args.tlist and args.myip):
-        printError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!")
-        sys.exit(1)
-    
-    if(args.tlist and args.g):
-        printError("Google maps location is working only with single targets.")
         sys.exit(2)
         
-    if(args.r and not args.ulist):
-        printError("You haven't provided a User-Agent strings file, each string in a new line.")
+    #my ip address or single target
+    if(args.target and args.myip):
+        printError("You can request Geolocation information either for a single target(-t) or your own IP address. Not both!")
         sys.exit(3)
+        
+    #multiple targets or my ip address
+    if(args.tlist and args.myip):
+        printError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!")
+        sys.exit(4)
     
-    ipGeoLocRequest = IpGeoLocationLib()
-    result = ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, 
-                                     args.r, args.ulist, args.proxy, 
-                                     args.noprint, args.verbose, args.nolog)
-
-    IpGeoLocObj = None
-    IpGeoLocObjs = None
-    
-    if type(result) is IpGeoLocation:
-        IpGeoLocObj = result
-    elif type(result) is list:
-        IpGeoLocObjs = result
-    else:
-        printError("Retrieving IP Geolocation information failed.")
+    #single target and google maps
+    if(args.tlist and args.g):
+        printError("Google maps location is working only with single targets.")
         sys.exit(5)
         
+    #pick random user-agent string without user-agent strings list
+    if(args.r and not args.ulist):
+        printError("You haven't provided a User-Agent strings file, each string in a new line.")
+        sys.exit(6)
     
-    if args.csv:
-        fileExporter = FileExporter()
-        printInfo('Saving results to {} CSV file.'.format(args.csv))
-        success = False
-        
-        if IpGeoLocObjs:
-            success = fileExporter.ExportListToCSV(IpGeoLocObjs, args.csv)
-        elif IpGeoLocObj:
-            success = fileExporter.ExportToCSV(IpGeoLocObj, args.csv)
-        
-        if not success:
-            printError('Saving results to {} CSV file failed.'.format(args.csv))
+    #init lib
+    ipGeoLocRequest = IpGeoLocationLib()
     
-    
-    if args.xml:
-        fileExporter = FileExporter()
-        printInfo('Saving results to {} XML file.'.format(args.xml))
-        success = False
-        
-        if IpGeoLocObjs:
-            success = fileExporter.ExportListToXML(IpGeoLocObjs, args.xml)
-        elif IpGeoLocObj:
-            success = fileExporter.ExportToXML(IpGeoLocObj, args.xml)
-        
-        if not success:
-            printError('Saving results to {} XML file failed.'.format(args.xml))
-            
-            
-    if args.txt:
-        fileExporter = FileExporter()
-        printInfo('Saving results to {} text file.'.format(args.txt))
-        success = False
-        
-        if IpGeoLocObjs:
-            success = fileExporter.ExportListToTXT(IpGeoLocObjs, args.txt)
-        elif IpGeoLocObj:
-            success = fileExporter.ExportToTXT(IpGeoLocObj, args.txt)
-            
-        if not success:
-            printError('Saving results to {} text file failed.'.format(args.txt))
-                
-    
-    if args.g:
-        if type(IpGeoLocObj.Longtitude) == float and type(IpGeoLocObj.Latitude) == float:
-            
-            printInfo('Opening Geolocation in browser..'.format(args.csv))
-            
-            if _platform == 'cygwin':
-                call(['cygstart', IpGeoLocObj.GoogleMapsLink])
-                
-            elif _platform == 'win32' or _platform == 'linux' or _platform == 'linux2':
-                webbrowser.open(IpGeoLocObj.GoogleMapsLink)
-            
-            else:
-                printError('-g option is not available on your platform.')
+    #retrieve information
+    if not ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, 
+                                     args.r, args.ulist, args.proxy, 
+                                     args.noprint, args.verbose, args.nolog, 
+                                     args.csv, args.xml, args.txt, args.g):
+        printError("Retrieving IP Geolocation information failed.")
+        sys.exit(6)
