@@ -18,6 +18,7 @@ Python 3.x
 * Define your own custom User Agent string.
 * Select random User-Agent strings from file. Each User Agent string in new line.
 * Proxy support.
+* Select random proxy from file. Each proxy URL in new line.
 * Open IP geolocation in Google Maps using the default browser.
 * Export results to csv, xml and txt format.
 
@@ -42,11 +43,11 @@ Python 3.x
 ---
 ```
 $ ./ip2geolocation.py
-usage: ip2geolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent] [-r]
+usage: ip2geolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
                          [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
-                         [-e file] [-ec file] [-ex file]
+                         [-X file] [-e file] [-ec file] [-ex file]
 
-IPGeoLocation 1.8
+IPGeoLocation 1.9
 Retrieve IP Geolocation information from http://ip-api.com
 http://ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
 
@@ -59,16 +60,17 @@ optional arguments:
   -T file, --tlist file
                         A list of IPs/Domains targets, each target in new line.
   -u User-Agent, --user-agent User-Agent
-                        Set the User-Agent request header (default: IP2GeoLocation 1.8).
-  -r                    Pick User-Agent strings randomly from a file.
+                        Set the User-Agent request header (default: IP2GeoLocation 1.9).
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
   -g                    Open IP location in Google maps with default browser.
-  --noprint             Run without printing results to terminal.
+  --noprint             IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation not to print results to terminal with this option.
   -v, --verbose         Enable verbose output.
-  --nolog               Run without logging.
+  --nolog               IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log files with this option.
   -x PROXY, --proxy PROXY
                         Setup proxy server (example: http://127.0.0.1:8080)
+  -X file, --xlist file
+                        A list of proxies, each proxy url in new line.
   -e file, --txt file   Export results.
   -ec file, --csv file  Export results in CSV format.
   -ex file, --xml file  Export results in XML format.
@@ -95,8 +97,11 @@ optional arguments:
 **Using Proxy**
 * ./ip2geolocation.py -t x.x.x.x -x http://127.0.0.1:8080
 
-**Pick User Agent string randomly**
-* ./ip2geolocation.py -t x.x.x.x -U /path/to/user/agent/strings/filename.txt -r 
+**Using random Proxy**
+* ./ip2geolocation.py -t x.x.x.x -X /path/to/proxies/filename.txt
+
+**Pick User-Agent string randomly**
+* ./ip2geolocation.py -t x.x.x.x -U /path/to/user/agent/strings/filename.txt
 
 **Retrieve IP geolocation and open location in Google maps with default browser**
 * ./ip2geolocation.py -t x.x.x.x -g

@@ -40,3 +40,12 @@ class UserAgentFileNotSpecifiedError(Exception):
 
 class ProxyServerNotReachableError(Exception):
     pass
+
+class ProxiesFileNotSpecifiedError(Exception):
+    pass
+
+class ProxiesFileEmptyError(Exception):
+    pass
+
+class InvalidProxyUrlError(Exception):
+    pass

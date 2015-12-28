@@ -102,10 +102,6 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
                         default='IP2GeoLocation {}'.format(__version__), 
                         help='Set the User-Agent request header (default: IP2GeoLocation {}).'.format(__version__))
     
-    parser.add_argument('-r', 
-                        action='store_true',
-                        help='Pick User-Agent strings randomly from a file.')
-    
     parser.add_argument('-U', '--ulist', 
                         metavar='file', 
                         type=checkFileRead, 
@@ -134,6 +130,11 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
     parser.add_argument('-x', '--proxy', 
                         type=checkProxyUrl, 
                         help='Setup proxy server (example: http://127.0.0.1:8080)')
+    
+    parser.add_argument('-X', '--xlist', 
+                        metavar='file', 
+                        type=checkFileRead, 
+                        help='A list of proxies, each proxy url in new line.')
     
     
     #export options
@@ -175,22 +176,28 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
         printError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!")
         sys.exit(4)
     
-    #single target and google maps
+    #single target and google maps only allowed
     if(args.tlist and args.g):
         printError("Google maps location is working only with single targets.")
         sys.exit(5)
-        
-    #pick random user-agent string without user-agent strings list
-    if(args.r and not args.ulist):
-        printError("You haven't provided a User-Agent strings file, each string in a new line.")
-        sys.exit(6)
     
+    #specify user-agent or random
+    if(args.uagent and args.ulist):
+        printError("You can either specify a user-agent string or let IPGeolocation pick random user-agent strings for you from a file.")
+        sys.exit(6)
+        
+    #specify proxy or random
+    if(args.proxy and args.xlist):
+        printError("You can either specify a proxy or let IPGeolocation pick random proxy connections for you from a file.")
+        sys.exit(7)
+        
+        
     #init lib
     ipGeoLocRequest = IpGeoLocationLib()
     
     #retrieve information
     if not ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, 
-                                     args.r, args.ulist, args.proxy, 
+                                     args.ulist, args.proxy, args.xlist, 
                                      args.noprint, args.verbose, args.nolog, 
                                      args.csv, args.xml, args.txt, args.g):
         printError("Retrieving IP Geolocation information failed.")

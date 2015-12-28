@@ -32,7 +32,7 @@ from libraries.colorama import Fore, Style
 from utilities.FileExporter import FileExporter
 from subprocess import call
 from sys import platform as _platform
-
+from urllib.parse import urlparse
 
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
@@ -42,11 +42,12 @@ class IpGeoLocationLib:
         self.URL = 'http://ip-api.com'
         self.RequestURL = self.URL + '/json/{}'
         self.BOLD = '\033[1m'
-        self.Proxy = request.ProxyHandler({})
-        self.RandomUA = False
+        self.Proxy = None
         self.UserAgentFile = None
         self.UserAgents = None
+        self.Proxies = None
         self.TargetsFile = None
+        self.ProxiesFile = None
         self.Targets = None
         self.Verbose = False
         self.NoPrint = False
@@ -54,20 +55,24 @@ class IpGeoLocationLib:
         
         
     def GetInfo(self, target, userAgent, targetsFile=None, 
-                rUserAgent=False, userAgentFile=None, 
-                proxy=False, noprint=False, verbose=False, 
-                nolog=False, exportToCSVFile=None, 
+                userAgentFile=None, proxy=False, proxiesFile=None, 
+                noprint=False, verbose=False, nolog=False, exportToCSVFile=None, 
                 exportToXMLFile=None, exportToTXTFile=None, 
                 googleMaps=False):
         """Retrieve information"""
         
         self.UserAgent = userAgent
-        self.RandomUA = rUserAgent
         self.Verbose = verbose
         self.NoPrint = noprint
         self.NoLog = nolog
         
         try:
+            
+            #check proxies file and load it
+            if proxiesFile and os.path.isfile(proxiesFile) and os.access(proxiesFile, os.R_OK):
+                self.ProxiesFile = proxiesFile
+                self.__print('Loading Proxies from file {}..'.format(self.ProxiesFile))
+                self.__loadProxies()
             
             #check user-agent strings file and load it
             if userAgentFile and os.path.isfile(userAgentFile) and os.access(userAgentFile, os.R_OK):
@@ -81,13 +86,10 @@ class IpGeoLocationLib:
                 self.__print('Loading targets from file {}..'.format(self.TargetsFile))
                 self.__loadTargets()
 
-            #read proxy settings, check if valid and configure connection
+            #check if proxy valid and configure connection
             if proxy:
-                self.__checkProxy(proxy.netloc)
-                self.Proxy = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
-                opener = request.build_opener(self.Proxy)
-                request.install_opener(opener)
-                self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
+                self.__configureProxy(proxy)
+            
             
             #retrieve information
             results = None
@@ -107,7 +109,7 @@ class IpGeoLocationLib:
             if exportToTXTFile and not os.path.exists(exportToTXTFile) and os.access(os.path.dirname(exportToTXTFile), os.W_OK):
                 self.__exportResultsToTXT(results, exportToTXTFile)
             
-            
+            #open location in Google Maps with default browser
             if googleMaps and type(results) is IpGeoLocation:
                 self.__openLocationInGoogleMaps(results)
                 
@@ -116,21 +118,45 @@ class IpGeoLocationLib:
         except MyExceptions.UserAgentFileEmptyError:
             self.__printError("User-Agent strings file is empty!")
         except MyExceptions.InvalidTargetError:
-            self.__printError('Please provide a valid Domain or IP address.')
+            self.__printError('Please provide a valid Domain or IP address!')
         except MyExceptions.TargetsFileEmptyError:
-            self.__printError('Targets file is empty!.')
+            self.__printError('Targets file is empty!')
         except MyExceptions.UserAgentFileNotSpecifiedError:
-            self.__printError('User-Agent strings file has not been provided!.')
+            self.__printError('User-Agent strings file has not been provided!')
         except MyExceptions.TargetsFileNotSpecifiedError:
-            self.__printError('Targets file has not been provided!.')
+            self.__printError('Targets file has not been provided!')
         except MyExceptions.ProxyServerNotReachableError:
-            self.__printError('Proxy server not reachable')
-        except:
-            self.__printError("An unexpected error occurred")
+            self.__printError('Proxy server not reachable!')
+        except MyExceptions.ProxiesFileNotSpecifiedError:
+            self.__printError('Proxies file has not been provided!')
+        except MyExceptions.ProxiesFileEmptyError:
+            self.__printError('Proxies file is empty!')
+        except MyExceptions.InvalidProxyUrlError:
+            self.__printError('Proxy URL is not valid!')
+        except Exception as error:
+            self.__printError('An unexpected error occurred {}!'.format(error))
         
         return False
     
     
+    def __checkProxyUrl(self, url):
+        """Check if proxy url is valid"""
+        url_checked = urlparse(url)
+        if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
+            raise MyExceptions.InvalidProxyUrlError()
+        return url_checked
+    
+    
+    def __configureProxy(self, proxy):
+        proxy = self.__checkProxyUrl(proxy)
+        self.__checkProxyConn(proxy.netloc)
+        self.Proxy = proxy
+        proxyHandler = request.ProxyHandler({'http':proxy.scheme + '://' + proxy.netloc})
+        opener = request.build_opener(proxyHandler)
+        request.install_opener(opener)
+        self.__print('Proxy ({}) has been configured.'.format(proxy.scheme + '://' + proxy.netloc))
+                
+                
     def __openLocationInGoogleMaps(self, ipGeolObj):
         """Open IP Geolocation in Google Maps with default browser"""
         if type(ipGeolObj.Longtitude) == float and type(ipGeolObj.Latitude) == float:
@@ -144,6 +170,7 @@ class IpGeoLocationLib:
             
             else:
                 self.__printError('-g option is not available on your platform.')
+        
         
     def __exportResultsToCSV(self, objToExport, csvFile):
         """Export results to csv file"""
@@ -221,9 +248,15 @@ class IpGeoLocationLib:
             target = ip
         
         
-        if self.RandomUA and self.UserAgentFile:
+        #pick random user-agent string
+        if self.UserAgentFile:
             self.__pickRandomUserAgent()
-        
+            
+            
+        #pick random proxy connection
+        if self.ProxiesFile:
+            self.__pickRandomProxy()
+            
         
         self.__print('Retrieving {} Geolocation..'.format(query))
         
@@ -234,7 +267,10 @@ class IpGeoLocationLib:
         response = request.urlopen(req)
         
         if response.code == 200:
+            
             self.__print('User-Agent used: {}'.format(self.UserAgent))
+            #self.__print('Proxy server used: {}'.format('{}://{}'.format(self.Proxy.scheme, self.Proxy.netloc)))
+            
             encoding = response.headers.get_content_charset()
             ipGeoLocObj = IpGeoLocation(query, json.loads(response.read().decode(encoding)))
             
@@ -248,14 +284,26 @@ class IpGeoLocationLib:
         return False
     
     
+    def __loadProxies(self):
+        """Load proxies from file"""
+        if not self.ProxiesFile:
+            raise MyExceptions.ProxiesFileNotSpecifiedError()
+        
+        self.Proxies = [line.strip() for line in open(self.ProxiesFile, 'r') if line.strip()]
+        self.__print('{} Proxies loaded.'.format(len(self.Proxies)))
+                
+        if len(self.Proxies) == 0:
+            raise MyExceptions.ProxiesFileEmptyError()
+        
+        
     def __loadUserAgents(self):
         """Load user-agent strings from file"""
         if not self.UserAgentFile:
             raise MyExceptions.UserAgentFileNotSpecifiedError()
         
         self.UserAgents = [line.strip() for line in open(self.UserAgentFile, 'r') if line.strip()]
-        self.__print('User-Agent strings loaded.')
-                
+        self.__print('{} User-Agent strings loaded.'.format(len(self.UserAgents)))
+
         if len(self.UserAgents) == 0:
             raise MyExceptions.UserAgentFileEmptyError()
         
@@ -266,14 +314,22 @@ class IpGeoLocationLib:
             raise MyExceptions.TargetsFileNotSpecifiedError()
         
         self.Targets = [line.strip() for line in open(self.TargetsFile, 'r') if line.strip()]
-        self.__print('Targets loaded.')
+        self.__print('{} Targets loaded.'.format(len(self.Targets)))
             
         if len(self.Targets) == 0:
             raise MyExceptions.TargetsFileEmptyError()
 
+
+    def __pickRandomProxy(self):
+        """Pick randomly a proxy from the list"""
+        if not self.Proxies or len(self.Proxies) == 0:
+            raise MyExceptions.ProxiesFileEmptyError()
+        
+        self.__configureProxy(random.choice(self.Proxies))
+ 
  
     def __pickRandomUserAgent(self):
-        """Pick randomly a user-agent string from list"""
+        """Pick randomly a user-agent string from the list"""
         if not self.UserAgents or len(self.UserAgents) == 0:
             raise MyExceptions.UserAgentFileEmptyError()
         
@@ -347,7 +403,7 @@ class IpGeoLocationLib:
         #.encode('cp737', errors='replace').decode('cp737')
 
 
-    def __checkProxy(self, proxy):
+    def __checkProxyConn(self, proxy):
         """check proxy connectivity"""
         check = True
         self.__print('Testing proxy {} connectivity..'.format(proxy))
