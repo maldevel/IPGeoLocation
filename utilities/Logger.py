@@ -4,7 +4,7 @@
 """
     IPGeoLocation - Retrieve IP Geolocation information 
     Powered by http://ip-api.com
-    Copyright (C) 2015 @maldevel
+    Copyright (C) 2015-2016 @maldevel
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,13 +22,15 @@
 
 __author__ = 'maldevel'
 
-from time import gmtime, strftime
+from datetime import datetime
+import os 
 
 class Logger:
     
     @staticmethod
     def WriteLog(messagetype, message):
-        filename = '{}.log'.format(strftime("%Y%m%d", gmtime()))
-        with open(filename, 'a') as logFile:
-            logFile.write('[{}] {} - {}\n'.format(messagetype, strftime("%Y-%m-%d %H:%M:%S", gmtime()), message))
+        filename = '{}.log'.format(datetime.strftime(datetime.now(), "%Y%m%d"))
+        path = os.path.join('.', 'logs', filename)
+        with open(path, 'a') as logFile:
+            logFile.write('[{}] {} - {}\n'.format(messagetype, datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"), message))
             

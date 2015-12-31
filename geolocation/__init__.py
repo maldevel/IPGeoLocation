@@ -1,7 +1,7 @@
 """
     IPGeoLocation - Retrieve IP Geolocation information 
     Powered by http://ip-api.com
-    Copyright (C) 2015 @maldevel
+    Copyright (C) 2015-2016 @maldevel
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
