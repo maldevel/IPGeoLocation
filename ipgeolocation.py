@@ -21,24 +21,15 @@
 """
 
 __author__ = 'maldevel'
-__version__ = '1.9'
+__version__ = '2.0'
 
-import argparse, sys, os.path
+import sys, argparse
+from core.Utils import *
+from core.Logger import *
 from argparse import RawTextHelpFormatter
-from geolocation.IpGeoLocationLib import IpGeoLocationLib
-from utilities.Logger import Logger
+from core.IpGeoLocationLib import IpGeoLocationLib
 from urllib.parse import urlparse
-from libraries.colorama import Fore, Style
-from sys import platform as _platform
 
-
-def checkProxyUrl(url):
-        """Check if proxy url is valid"""
-        url_checked = urlparse(url)
-        if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
-            raise argparse.ArgumentTypeError('Invalid {} Proxy URL (example: https://127.0.0.1:8080).'.format(url))
-        return url_checked
-    
 
 def checkFileRead(filename):
     """Check if file exists and we have access to read it"""
@@ -58,19 +49,15 @@ def checkFileWrite(filename):
         return filename
     else:
         raise argparse.ArgumentTypeError("Unable to write to {} file (Insufficient permissions).".format(filename))
-
-
-def printError(message):
-    """Print/Log error message"""
-    if not args.nolog:
-        Logger.WriteLog('ERROR', message)
-            
-    if _platform == 'win32':
-        print('[ERROR] {}'.format(message))
-    else:
-        print('[' + Fore.RED + 'ERROR' + Style.RESET_ALL + '] {}'.format(message))
     
-
+    
+def checkProxyUrl(url):
+    """Check if proxy url is valid"""
+    url_checked = urlparse(url)
+    if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
+        raise argparse.ArgumentTypeError('Invalid {} Proxy URL (example: http://127.0.0.1:8080).'.format(url))
+    return url_checked
+    
     
 if __name__ == '__main__':
 
@@ -78,7 +65,6 @@ if __name__ == '__main__':
 Retrieve IP Geolocation information from http://ip-api.com
 http://ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
     """.format(__version__), formatter_class=RawTextHelpFormatter)
-    
     
     #pick target/s
     parser.add_argument('-m', '--my-ip',  
@@ -163,32 +149,32 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
       
     #single target or multiple targets 
     if(args.target and args.tlist):
-        printError("You can request Geolocation information either for a single target(-t) or a list of targets(-T). Not both!")
+        PrintError("You can request Geolocation information either for a single target(-t) or a list of targets(-T). Not both!", args.nolog)
         sys.exit(2)
         
     #my ip address or single target
     if(args.target and args.myip):
-        printError("You can request Geolocation information either for a single target(-t) or your own IP address. Not both!")
+        PrintError("You can request Geolocation information either for a single target(-t) or your own IP address. Not both!", args.nolog)
         sys.exit(3)
         
     #multiple targets or my ip address
     if(args.tlist and args.myip):
-        printError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!")
+        PrintError("You can request Geolocation information either for a list of targets(-T) or your own IP address. Not both!", args.nolog)
         sys.exit(4)
     
     #single target and google maps only allowed
     if(args.tlist and args.g):
-        printError("Google maps location is working only with single targets.")
+        PrintError("Google maps location is working only with single targets.", args.nolog)
         sys.exit(5)
     
     #specify user-agent or random
     if(args.uagent and args.ulist):
-        printError("You can either specify a user-agent string or let IPGeolocation pick random user-agent strings for you from a file.")
+        PrintError("You can either specify a user-agent string or let IPGeolocation pick random user-agent strings for you from a file.", args.nolog)
         sys.exit(6)
         
     #specify proxy or random
     if(args.proxy and args.xlist):
-        printError("You can either specify a proxy or let IPGeolocation pick random proxy connections for you from a file.")
+        PrintError("You can either specify a proxy or let IPGeolocation pick random proxy connections for you from a file.", args.nolog)
         sys.exit(7)
         
         
@@ -200,5 +186,5 @@ http://ip-api.com service will automatically ban any IP addresses doing over 150
                                      args.ulist, args.proxy, args.xlist, 
                                      args.noprint, args.verbose, args.nolog, 
                                      args.csv, args.xml, args.txt, args.g):
-        printError("Retrieving IP Geolocation information failed.")
+        PrintError("Retrieving IP Geolocation information failed.")
         sys.exit(6)
