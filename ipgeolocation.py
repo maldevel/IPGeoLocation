@@ -83,7 +83,7 @@ def main():
                                      args.noprint, args.verbose, args.nolog, 
                                      args.csv, args.xml, args.txt, args.g):
         PrintError("Retrieving IP Geolocation information failed.")
-        sys.exit(6)
+        sys.exit(8)
 
 
 if __name__ == '__main__':
