@@ -2,10 +2,13 @@
 # encoding: UTF-8
 
 """
+    This file is part of IPGeoLocation tool.
+    Copyright (C) 2015-2016 @maldevel
+    https://github.com/maldevel/IPGeoLocation
+    
     IPGeoLocation - Retrieve IP Geolocation information 
     Powered by http://ip-api.com
-    Copyright (C) 2015-2016 @maldevel
-
+    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -18,6 +21,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    For more see the file 'LICENSE' for copying permission.
 """
 
 __author__ = 'maldevel'
@@ -44,12 +49,12 @@ def PrintError(message, nolog=False):
     if not nolog:
         WriteLog('ERROR', message)
     
-    print('[{}] {}'.format(colored('ERROR', 'red', attrs=['bold']), message))
+    print('[{}] {}'.format(Red('ERROR'), message))
 
 
 def PrintResult(title, value):
     """print result to terminal"""
-    print('{}: {}'.format(title, colored(value, 'green', attrs=['bold'])))
+    print('{}: {}'.format(title, Green(value)))
 
 
 def Print(message, nolog=False, verbose=False):
@@ -58,7 +63,15 @@ def Print(message, nolog=False, verbose=False):
         WriteLog('INFO', message)
         
     if verbose:
-        print('[{}] {}'.format(colored('**', 'green', attrs=['bold']), message))
+        print('[{}] {}'.format(Green('**'), message))
+
+
+def Red(value):
+    return colored(value, 'red', attrs=['bold'])
+
+
+def Green(value):
+    return colored(value, 'green', attrs=['bold'])
 
 
 def PrintIPGeoLocation(ipGeoLocation):

@@ -2,10 +2,13 @@
 # encoding: UTF-8
 
 """
+    This file is part of IPGeoLocation tool.
+    Copyright (C) 2015-2016 @maldevel
+    https://github.com/maldevel/IPGeoLocation
+    
     IPGeoLocation - Retrieve IP Geolocation information 
     Powered by http://ip-api.com
-    Copyright (C) 2015-2016 @maldevel
-
+    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -18,17 +21,18 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    For more see the file 'LICENSE' for copying permission.
 """
 
 __author__ = 'maldevel'
 
 import webbrowser, ipaddress, socket
-from core.Logger import *
 from sys import platform as _platform
 from subprocess import call
 from urllib import request
 from core import MyExceptions 
-    
+from core.Logger import Print, PrintError
 
 def openLocationInGoogleMaps(ipGeolObj, nolog=False, verbose=False):
     """Open IP Geolocation in Google Maps with default browser"""
