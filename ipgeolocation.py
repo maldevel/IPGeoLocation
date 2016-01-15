@@ -73,16 +73,15 @@ def main():
         
         
     #init lib
-    ipGeoLocRequest = IpGeoLocationLib()
+    ipGeoLocRequest = IpGeoLocationLib(args.target, args.noprint, args.verbose, args.nolog)
     
     print(banner)
     
     #retrieve information
-    if not ipGeoLocRequest.GetInfo(args.target, args.uagent, args.tlist, 
-                                     args.ulist, args.proxy, args.xlist, 
-                                     args.noprint, args.verbose, args.nolog, 
+    if not ipGeoLocRequest.GetInfo(args.uagent, args.tlist, 
+                                     args.ulist, args.proxy, args.xlist,
                                      args.csv, args.xml, args.txt, args.g):
-        PrintError("Retrieving IP Geolocation information failed.")
+        PrintError("Retrieving IP Geolocation information failed.", args.nolog)
         sys.exit(8)
 
 

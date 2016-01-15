@@ -38,8 +38,7 @@ from urllib.parse import urlparse
 class IpGeoLocationLib:
     """Retrieve IP Geolocation information from http://ip-api.com"""
     
-    
-    def __init__(self):    
+    def __init__(self, target, noprint=False, verbose=False, nolog=False):    
         self.URL = 'http://ip-api.com'
         self.RequestURL = self.URL + '/json/{}'
         self.BOLD = '\033[1m'
@@ -50,22 +49,19 @@ class IpGeoLocationLib:
         self.TargetsFile = None
         self.ProxiesFile = None
         self.Targets = None
-        self.Verbose = False
-        self.NoPrint = False
-        self.NoLog = False 
-        
-        
-    def GetInfo(self, target, userAgent, targetsFile=None, 
-                userAgentFile=None, proxy=False, proxiesFile=None, 
-                noprint=False, verbose=False, nolog=False, exportToCSVFile=None, 
-                exportToXMLFile=None, exportToTXTFile=None, 
-                googleMaps=False):
-        """Retrieve information"""
-        
-        self.UserAgent = userAgent
         self.Verbose = verbose
         self.NoPrint = noprint
         self.NoLog = nolog
+        self.Target = target
+        
+        
+    def GetInfo(self, userAgent, targetsFile=None, 
+                userAgentFile=None, proxy=False, proxiesFile=None, 
+                exportToCSVFile=None, exportToXMLFile=None, 
+                exportToTXTFile=None, googleMaps=False):
+        """Retrieve information"""
+        
+        self.UserAgent = userAgent
         
         try:
             
@@ -98,7 +94,7 @@ class IpGeoLocationLib:
                 results = self.__retrieveGeolocations()
             
             else:
-                results = self.__retrieveGeolocation(target)
+                results = self.__retrieveGeolocation(self.Target)
             
             #export information
             if exportToCSVFile and not os.path.exists(exportToCSVFile) and os.access(os.path.dirname(exportToCSVFile), os.W_OK):
