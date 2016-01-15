@@ -43,14 +43,15 @@ Python 3.x
 ---
 ```
 $ ./ip2geolocation.py
-usage: ip2geolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
-                         [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
-                         [-X file] [-e file] [-ec file] [-ex file]
+usage: ipgeolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
+                        [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
+                        [-X file] [-e file] [-ec file] [-ex file]
 
-IPGeoLocation 1.9
-Retrieve IP Geolocation information from http://ip-api.com
-http://ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
+IPGeolocation 2.0
 
+--[ Retrieve IP Geolocation information from ip-api.com
+--[ Copyright (c) 2015-2016 maldevel (@maldevel)
+--[ ip-api.com service will automatically ban any IP addresses doing over 150 requests per minute.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -60,13 +61,15 @@ optional arguments:
   -T file, --tlist file
                         A list of IPs/Domains targets, each target in new line.
   -u User-Agent, --user-agent User-Agent
-                        Set the User-Agent request header (default: IP2GeoLocation 1.9).
+                        Set the User-Agent request header (default: IP2GeoLocation 2.0).
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
   -g                    Open IP location in Google maps with default browser.
-  --noprint             IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation not to print results to terminal with this option.
+  --noprint             IPGeolocation will print IP Geolocation info to terminal. It is possible to tell IPGeolocation n
+ot to print results to terminal with this option.
   -v, --verbose         Enable verbose output.
-  --nolog               IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log files with this option.
+  --nolog               IPGeolocation will save a .log file. It is possible to tell IPGeolocation not to save those log
+files with this option.
   -x PROXY, --proxy PROXY
                         Setup proxy server (example: http://127.0.0.1:8080)
   -X file, --xlist file
