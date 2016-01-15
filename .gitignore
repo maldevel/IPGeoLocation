@@ -57,6 +57,8 @@ docs/_build/
 target/
 
 # PyDev
+RemoteSystemsTempFiles
 .project
 .pydevproject
+.metadata
 .settings
