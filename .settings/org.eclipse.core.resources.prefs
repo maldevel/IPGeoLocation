@@ -4,5 +4,6 @@ encoding//core/IpGeoLocation.py=UTF-8
 encoding//core/IpGeoLocationLib.py=UTF-8
 encoding//core/Logger.py=UTF-8
 encoding//core/Menu.py=UTF-8
+encoding//core/MyExceptions.py=UTF-8
 encoding//core/Utils.py=UTF-8
 encoding/ipgeolocation.py=UTF-8

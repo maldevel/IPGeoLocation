@@ -27,7 +27,7 @@
 
 __author__ = 'maldevel'
 __twitter__  = '@maldevel'
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 __year__    = '2015-2016'
 
 
