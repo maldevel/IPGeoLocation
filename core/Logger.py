@@ -50,6 +50,7 @@ class Logger:
         self.NoLog = nolog
         self.Verbose = verbose
         
+        
     def WriteLog(self, messagetype, message):
         filename = '{}.log'.format(datetime.strftime(datetime.now(), "%Y%m%d"))
         path = os.path.join('.', 'logs', filename)

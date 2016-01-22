@@ -28,11 +28,10 @@
 __author__  = 'maldevel'
 
 
-import sys
+import sys, os
 from core.IpGeoLocationLib import IpGeoLocationLib
 from core.Logger import Logger
 from core.Menu import parser,args,banner
-    
     
 def main():
 
@@ -41,6 +40,13 @@ def main():
         parser.print_help()
         sys.exit(1)
     
+    logsDir = os.path.join(os.getcwd(), 'logs')
+    #resultsDir = os.path.join(os.getcwd(), 'results')
+    if not os.path.exists(logsDir):
+        os.mkdir(logsDir)
+    #if not os.path.exists(resultsDir):
+    #    os.mkdir(resultsDir)
+        
     logger = Logger(args.nolog, args.verbose)
     
     #single target or multiple targets 

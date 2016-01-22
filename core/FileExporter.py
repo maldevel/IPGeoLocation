@@ -36,13 +36,11 @@ class FileExporter:
     def __init__(self):
         pass
     
-    
     def ExportListToCSV(self, ipGeoLocObjs, filename):
         return self.__ExportToCSV(ipGeoLocObjs, filename)
         
     def ExportToCSV(self, ipGeoLocObj, filename):
         return self.__ExportToCSV([ipGeoLocObj], filename)
-    
     
     def ExportListToXML(self, ipGeoLocObjs, filename):
         return self.__ExportToXML(ipGeoLocObjs, filename)
@@ -50,13 +48,11 @@ class FileExporter:
     def ExportToXML(self, ipGeoLocObj, filename):
         return self.__ExportToXML([ipGeoLocObj], filename)
 
-    
     def ExportListToTXT(self, ipGeoLocObjs, filename):
         return self.__ExportToTXT(ipGeoLocObjs, filename)
         
     def ExportToTXT(self, ipGeoLocObj, filename):
         return self.__ExportToTXT([ipGeoLocObj], filename)
-    
     
     def __ExportToTXT(self, ipGeoLocObjs, filename):
         try:
