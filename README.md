@@ -47,7 +47,7 @@ usage: ipgeolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
                         [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
                         [-X file] [-e file] [-ec file] [-ex file]
 
-IPGeolocation 2.0.1
+IPGeolocation 2.0.3
 
 --[ Retrieve IP Geolocation information from ip-api.com
 --[ Copyright (c) 2015-2016 maldevel (@maldevel)
@@ -61,7 +61,7 @@ optional arguments:
   -T file, --tlist file
                         A list of IPs/Domains targets, each target in new line.
   -u User-Agent, --user-agent User-Agent
-                        Set the User-Agent request header (default: IP2GeoLocation 2.0).
+                        Set the User-Agent request header (default: IP2GeoLocation 2.0.3).
   -U file, --ulist file
                         A list of User-Agent strings, each string in new line.
   -g                    Open IP location in Google maps with default browser.
