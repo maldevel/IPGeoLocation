@@ -47,7 +47,7 @@ usage: ipgeolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
                         [-U file] [-g] [--noprint] [-v] [--nolog] [-x PROXY]
                         [-X file] [-e file] [-ec file] [-ex file]
 
-IPGeolocation 2.0.3
+IPGeolocation 2.0.4
 
 --[ Retrieve IP Geolocation information from ip-api.com
 --[ Copyright (c) 2015-2016 maldevel (@maldevel)
