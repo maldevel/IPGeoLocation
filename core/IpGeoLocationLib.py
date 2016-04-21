@@ -138,7 +138,7 @@ class IpGeoLocationLib:
     def __checkProxyUrl(self, url):
         """Check if proxy url is valid"""
         url_checked = urlparse(url)
-        if ((url_checked.scheme != 'http') & (url_checked.scheme != 'https')) | (url_checked.netloc == ''):
+        if (url_checked.scheme not in ('http', 'https')) | (url_checked.netloc == ''):
             return False
         return url_checked
     
