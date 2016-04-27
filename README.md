@@ -1,17 +1,24 @@
 # IPGeoLocation
-
-**A tool to retrieve IP Geolocation information**
-
-Powered by [ip-api](http://ip-api.com/docs/)
-
-
-**Requirements**
----
-Python 3.x
+====
+* A tool to retrieve IP Geolocation information
+* Powered by [ip-api](http://ip-api.com/docs/)
 
 
-**Features**
----
+Requirements
+=====
+* Python 3.x
+* termcolor
+* colorama
+
+
+Download/Installation
+====
+* git clone https://github.com/maldevel/IPGeoLocation
+* pip install -r requirements.txt --user
+
+
+Features
+====
 * Retrieve IP or Domain Geolocation.
 * Retrieve your own IP Geolocation.
 * Retrieve Geolocation for IPs or Domains loaded from file. Each target in new line.
@@ -23,8 +30,8 @@ Python 3.x
 * Export results to csv, xml and txt format.
 
 
-**Geolocation Information**
----
+Geolocation Information
+====
 * ASN
 * City
 * Country
@@ -39,8 +46,8 @@ Python 3.x
 * Zip Code
 
 
-**Usage**
----
+Usage
+====
 ```
 $ ./ip2geolocation.py
 usage: ipgeolocation.py [-h] [-m] [-t TARGET] [-T file] [-u User-Agent]
@@ -80,8 +87,8 @@ files with this option.
 ```
   
 
-**Examples**
----
+Examples
+====
 **Retrieve your IP Geolocation**
 * ./ip2geolocation.py -m
 
