@@ -4,7 +4,7 @@
 """
     This file is part of IPGeoLocation tool.
     Copyright (C) 2015-2016 @maldevel
-    https://github.com/maldevel/IPGeoLocation
+    https://github.com/Jokerhack1/IPGeoLocation
     
     IPGeoLocation - Retrieve IP Geolocation information 
     Powered by http://ip-api.com
