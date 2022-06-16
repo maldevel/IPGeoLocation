@@ -90,7 +90,7 @@ class Logger:
         self.PrintResult('Country Code', ipGeoLocation.CountryCode)
         self.PrintResult('ISP', ipGeoLocation.ISP)
         self.PrintResult('Latitude', str(ipGeoLocation.Latitude))
-        self.PrintResult('Longtitude', str(ipGeoLocation.Longtitude))
+        self.PrintResult('Longitude', str(ipGeoLocation.Longitude))
         self.PrintResult('Organization', ipGeoLocation.Organization)
         self.PrintResult('Region Code', ipGeoLocation.Region)
         self.PrintResult('Region Name', ipGeoLocation.RegionName)
