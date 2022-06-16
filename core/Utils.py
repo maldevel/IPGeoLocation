@@ -42,7 +42,7 @@ class Utils:
         
     def openLocationInGoogleMaps(self, ipGeolObj):
         """Open IP Geolocation in Google Maps with default browser"""
-        if type(ipGeolObj.Longtitude) == float and type(ipGeolObj.Latitude) == float:
+        if type(ipGeolObj.Longitude) == float and type(ipGeolObj.Latitude) == float:
             self.Logger.Print('Opening Geolocation in browser..')
             
             if _platform == 'cygwin':

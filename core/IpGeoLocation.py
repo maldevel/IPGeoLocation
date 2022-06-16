@@ -39,7 +39,7 @@ class IpGeoLocation:
         self.CountryCode = '-'
         self.ISP = '-'
         self.Latitude = 0.0
-        self.Longtitude = 0.0
+        self.Longitude = 0.0
         self.Organization = '-'
         self.IP = '0.0.0.0'
         self.Region = '-'
@@ -70,7 +70,7 @@ class IpGeoLocation:
                     self.Latitude = jsonData['lat']
                   
                 if 'lon' in jsonData:
-                    self.Longtitude = jsonData['lon']
+                    self.Longitude = jsonData['lon']
                   
                 if 'org' in jsonData:
                     self.Organization = jsonData['org']
@@ -93,15 +93,15 @@ class IpGeoLocation:
                 if 'zip' in jsonData:
                     self.Zip = jsonData['zip']
                 
-                if type(self.Latitude) == float and type(self.Longtitude) == float: 
-                    self.GoogleMapsLink = 'http://www.google.com/maps/place/{0},{1}/@{0},{1},16z'.format(self.Latitude, self.Longtitude)
+                if type(self.Latitude) == float and type(self.Longitude) == float: 
+                    self.GoogleMapsLink = 'http://www.google.com/maps/place/{0},{1}/@{0},{1},16z'.format(self.Latitude, self.Longitude)
                     
                     
     def ToDict(self):
         #self.__dict__.
         return {'Target':self.Query, 'IP':self.IP, 'ASN':self.ASN, 'City':self.City, 
                     'Country':self.Country, 'Country Code':self.CountryCode, 'ISP':self.ISP, 
-                    'Latitude':str(self.Latitude), 'Longtitude':str(self.Longtitude), 
+                    'Latitude':str(self.Latitude), 'Longitude':str(self.Longitude), 
                     'Organization':self.Organization, 'Region':self.Region, 
                     'Region Name':self.RegionName, 'Timezone':self.Timezone, 
                     'Zip':self.Zip, 'Google Maps':self.GoogleMapsLink

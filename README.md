@@ -43,7 +43,7 @@ Geolocation Information
 * Country Code
 * ISP
 * Latitude
-* Longtitude
+* Longitude
 * Organization
 * Region Code
 * Region Name
