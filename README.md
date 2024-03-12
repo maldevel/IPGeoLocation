@@ -21,6 +21,11 @@ if pip3 is missing:
 * easy_install3 pip
 * pip3 install -r requirements.txt
 
+Docker Image Setup
+===
+* docker build -t IP2geolocation .
+* docker run IP2geolocation
+* an exapmle; docker run IP2geolocation -m
 
 Features
 ====
